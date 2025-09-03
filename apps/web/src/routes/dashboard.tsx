@@ -1,8 +1,8 @@
-import { authClient } from "@/lib/auth-client";
-import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { authClient } from "@/lib/auth-client";
+import { trpc } from "@/utils/trpc";
 
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
@@ -16,7 +16,7 @@ function RouteComponent() {
   const privateData = useQuery(trpc.privateData.queryOptions());
 
   useEffect(() => {
-    if (!session && !isPending) {
+    if (!(session || isPending)) {
       navigate({
         to: "/login",
       });

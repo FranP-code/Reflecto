@@ -1,15 +1,14 @@
 import "dotenv/config";
+import { execSync } from "node:child_process";
+import { join } from "node:path";
 import { trpcServer } from "@hono/trpc-server";
-import { createContext } from "./lib/context";
-import { appRouter } from "./routers/index";
-import { auth } from "./lib/auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger as honoLogger } from "hono/logger";
-
-import { join } from "node:path";
-import { execSync } from "node:child_process";
+import { auth } from "./lib/auth";
+import { createContext } from "./lib/context";
 import { logger } from "./lib/logger";
+import { appRouter } from "./routers/index";
 
 const app = new Hono();
 
