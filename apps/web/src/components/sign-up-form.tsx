@@ -2,11 +2,14 @@ import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
-import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/lib/auth-hooks";
 import Loader from "./loader";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+
+const MIN_PASSWORD_LENGTH = 8;
+const MIN_NAME_LENGTH = 2;
 
 export default function SignUpForm({
   onSwitchToSignIn,
@@ -16,7 +19,7 @@ export default function SignUpForm({
   const navigate = useNavigate({
     from: "/",
   });
-  const { isPending } = authClient.useSession();
+  const { loading, signUp } = useAuth();
 
   const form = useForm({
     defaultValues: {
@@ -25,35 +28,31 @@ export default function SignUpForm({
       name: "",
     },
     onSubmit: async ({ value }) => {
-      await authClient.signUp.email(
-        {
-          email: value.email,
-          password: value.password,
-          name: value.name,
-        },
-        {
-          onSuccess: () => {
-            navigate({
-              to: "/dashboard",
-            });
-            toast.success("Sign up successful");
-          },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
-          },
-        }
-      );
+      const result = await signUp(value.email, value.password, value.name);
+
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        navigate({
+          to: "/dashboard",
+        });
+        toast.success("Sign up successful");
+      }
     },
     validators: {
       onSubmit: z.object({
-        name: z.string().min(2, "Name must be at least 2 characters"),
+        name: z
+          .string()
+          .min(MIN_NAME_LENGTH, "Name must be at least 2 characters"),
         email: z.email("Invalid email address"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
+        password: z
+          .string()
+          .min(MIN_PASSWORD_LENGTH, "Password must be at least 8 characters"),
       }),
     },
   });
 
-  if (isPending) {
+  if (loading) {
     return <Loader />;
   }
 

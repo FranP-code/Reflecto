@@ -2,11 +2,13 @@ import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
-import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/lib/auth-hooks";
 import Loader from "./loader";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+
+const MIN_PASSWORD_LENGTH = 8;
 
 export default function SignInForm({
   onSwitchToSignUp,
@@ -16,7 +18,7 @@ export default function SignInForm({
   const navigate = useNavigate({
     from: "/",
   });
-  const { isPending } = authClient.useSession();
+  const { loading, signIn } = useAuth();
 
   const form = useForm({
     defaultValues: {
@@ -24,33 +26,28 @@ export default function SignInForm({
       password: "",
     },
     onSubmit: async ({ value }) => {
-      await authClient.signIn.email(
-        {
-          email: value.email,
-          password: value.password,
-        },
-        {
-          onSuccess: () => {
-            navigate({
-              to: "/dashboard",
-            });
-            toast.success("Sign in successful");
-          },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
-          },
-        }
-      );
+      const result = await signIn(value.email, value.password);
+
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        navigate({
+          to: "/dashboard",
+        });
+        toast.success("Sign in successful");
+      }
     },
     validators: {
       onSubmit: z.object({
         email: z.email("Invalid email address"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
+        password: z
+          .string()
+          .min(MIN_PASSWORD_LENGTH, "Password must be at least 8 characters"),
       }),
     },
   });
 
-  if (isPending) {
+  if (loading) {
     return <Loader />;
   }
 

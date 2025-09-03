@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/lib/auth-hooks";
 import { trpc } from "@/utils/trpc";
 
 export const Route = createFileRoute("/dashboard")({
@@ -9,28 +9,36 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function RouteComponent() {
-  const { data: session, isPending } = authClient.useSession();
+  const { user, loading } = useAuth();
 
   const navigate = Route.useNavigate();
 
   const privateData = useQuery(trpc.privateData.queryOptions());
 
   useEffect(() => {
-    if (!(session || isPending)) {
+    if (loading) {
+      return;
+    }
+
+    if (!user) {
       navigate({
         to: "/login",
       });
     }
-  }, [session, isPending]);
+  }, [user, loading, navigate]);
 
-  if (isPending) {
+  if (loading) {
     return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return null; // Will redirect in useEffect
   }
 
   return (
     <div>
       <h1>Dashboard</h1>
-      <p>Welcome {session?.user.name}</p>
+      <p>Welcome {user.name}</p>
       <p>privateData: {privateData.data?.message}</p>
     </div>
   );

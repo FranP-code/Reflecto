@@ -12,7 +12,7 @@
 	"frontend": ["tanstack-router"],
 	"addons": ["husky", "pwa", "tauri", "turborepo", "ultracite"],
 	"examples": [],
-	"auth": "better-auth",
+	"auth": "appwrite",
 	"packageManager": "pnpm",
 	"dbSetup": "docker",
 	"api": "trpc",
