@@ -1,8 +1,9 @@
 import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import type { AnyRouter } from "@trpc/server";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
-import type { AppRouter } from "../../../server/src/routers";
+import { authClient } from "@/lib/auth-client";
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -19,21 +20,48 @@ export const queryClient = new QueryClient({
   }),
 });
 
-export const trpcClient = createTRPCClient<AppRouter>({
+export const trpcClient = createTRPCClient<AnyRouter>({
   links: [
     httpBatchLink({
       url: `${import.meta.env.VITE_SERVER_URL}/trpc`,
-      fetch(url, options) {
-        return fetch(url, {
-          ...options,
-          credentials: "include",
-        });
+      async fetch(url, options) {
+        // Try to include a short-lived JWT to authorize on the server
+        try {
+          const jwt = await authClient.getJWT();
+          return fetch(url, {
+            ...options,
+            credentials: "include",
+            headers: {
+              ...(options?.headers || {}),
+              Authorization: `Bearer ${jwt}`,
+            },
+          });
+        } catch {
+          return fetch(url, {
+            ...options,
+            credentials: "include",
+          });
+        }
       },
     }),
   ],
 });
 
-export const trpc = createTRPCOptionsProxy<AppRouter>({
+export const trpc: any = createTRPCOptionsProxy<AnyRouter>({
   client: trpcClient,
   queryClient,
 });
+
+type TRPCUntypedClient = {
+  query: (path: string, input?: unknown) => Promise<unknown>;
+};
+
+const untypedClient = trpcClient as unknown as TRPCUntypedClient;
+
+export function queryHealthCheck(): Promise<string> {
+  return untypedClient.query("healthCheck") as Promise<string>;
+}
+
+export function queryPrivateData(): Promise<{ message: string }> {
+  return untypedClient.query("privateData") as Promise<{ message: string }>;
+}

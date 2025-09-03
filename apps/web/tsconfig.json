@@ -12,12 +12,9 @@
     "rootDirs": ["."],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "server/*": ["../server/src/*"]
     }
   },
-  "references": [
-    {
-      "path": "../server"
-    }
-  ]
+  "references": []
 }

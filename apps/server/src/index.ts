@@ -5,7 +5,6 @@ import { trpcServer } from "@hono/trpc-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger as honoLogger } from "hono/logger";
-import { auth } from "./lib/auth";
 import { createContext } from "./lib/context";
 import { logger } from "./lib/logger";
 import { appRouter } from "./routers/index";
@@ -35,7 +34,7 @@ app.use(
   })
 );
 
-app.on(["POST", "GET"], "/api/auth/**", (c) => auth.handler(c.req.raw));
+// Appwrite authentication handled client-side with JWT; no local auth routes needed
 
 app.use(
   "/trpc/*",

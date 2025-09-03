@@ -1,27 +1,30 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { authClient } from "@/lib/auth-client";
-import { trpc } from "@/utils/trpc";
+import { useUser } from "@/lib/auth-client";
+import { queryPrivateData } from "@/utils/trpc";
 
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { data: session, isPending } = authClient.useSession();
+  const { data: user, isPending } = useUser();
 
   const navigate = Route.useNavigate();
 
-  const privateData = useQuery(trpc.privateData.queryOptions());
+  const privateData = useQuery({
+    queryKey: ["privateData"],
+    queryFn: queryPrivateData,
+  });
 
   useEffect(() => {
-    if (!(session || isPending)) {
+    if (!(user || isPending)) {
       navigate({
         to: "/login",
       });
     }
-  }, [session, isPending]);
+  }, [user, isPending, navigate]);
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -30,8 +33,13 @@ function RouteComponent() {
   return (
     <div>
       <h1>Dashboard</h1>
-      <p>Welcome {session?.user.name}</p>
-      <p>privateData: {privateData.data?.message}</p>
+      <p>Welcome {user?.name}</p>
+      <p>
+        privateData:{" "}
+        {typeof privateData.data === "object"
+          ? (privateData.data as { message?: string })?.message
+          : null}
+      </p>
     </div>
   );
 }
