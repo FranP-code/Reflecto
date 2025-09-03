@@ -1,12 +1,15 @@
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
-import { authClient } from "@/lib/auth-client";
+import { account, authClient } from "@/lib/auth-client";
 import Loader from "./loader";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+
+const MIN_PASSWORD_LENGTH = 8;
 
 export default function SignUpForm({
   onSwitchToSignIn,
@@ -17,6 +20,7 @@ export default function SignUpForm({
     from: "/",
   });
   const { isPending } = authClient.useSession();
+  const queryClient = useQueryClient();
 
   const form = useForm({
     defaultValues: {
@@ -25,30 +29,34 @@ export default function SignUpForm({
       name: "",
     },
     onSubmit: async ({ value }) => {
-      await authClient.signUp.email(
-        {
+      try {
+        await authClient.signUp.email({
           email: value.email,
           password: value.password,
           name: value.name,
-        },
-        {
-          onSuccess: () => {
-            navigate({
-              to: "/dashboard",
-            });
-            toast.success("Sign up successful");
-          },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
-          },
-        }
-      );
+        });
+        // Hydrate session cache immediately and invalidate for freshness
+        const me = await account.get();
+        queryClient.setQueryData(["session", "me"], me);
+        await queryClient.invalidateQueries({ queryKey: ["session", "me"] });
+        navigate({ to: "/dashboard" });
+        toast.success("Sign up successful");
+      } catch (error) {
+        const msg =
+          error instanceof Error ? error.message : "Failed to sign up";
+        toast.error(msg);
+      }
     },
     validators: {
       onSubmit: z.object({
         name: z.string().min(2, "Name must be at least 2 characters"),
         email: z.email("Invalid email address"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
+        password: z
+          .string()
+          .min(
+            MIN_PASSWORD_LENGTH,
+            `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
+          ),
       }),
     },
   });

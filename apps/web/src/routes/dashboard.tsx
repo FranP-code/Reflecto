@@ -21,7 +21,7 @@ function RouteComponent() {
         to: "/login",
       });
     }
-  }, [session, isPending]);
+  }, [session, isPending, navigate]);
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -30,7 +30,7 @@ function RouteComponent() {
   return (
     <div>
       <h1>Dashboard</h1>
-      <p>Welcome {session?.user.name}</p>
+      <p>Welcome {session?.name ?? session?.email}</p>
       <p>privateData: {privateData.data?.message}</p>
     </div>
   );

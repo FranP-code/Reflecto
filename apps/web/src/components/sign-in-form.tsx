@@ -1,8 +1,11 @@
+const MIN_PASSWORD_LENGTH = 8;
+
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
-import { authClient } from "@/lib/auth-client";
+import { account, authClient } from "@/lib/auth-client";
 import Loader from "./loader";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -17,6 +20,7 @@ export default function SignInForm({
     from: "/",
   });
   const { isPending } = authClient.useSession();
+  const queryClient = useQueryClient();
 
   const form = useForm({
     defaultValues: {
@@ -24,28 +28,33 @@ export default function SignInForm({
       password: "",
     },
     onSubmit: async ({ value }) => {
-      await authClient.signIn.email(
-        {
+      try {
+        await authClient.signIn.email({
           email: value.email,
           password: value.password,
-        },
-        {
-          onSuccess: () => {
-            navigate({
-              to: "/dashboard",
-            });
-            toast.success("Sign in successful");
-          },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
-          },
-        }
-      );
+        });
+        // Hydrate session cache immediately for instant UI update
+        const me = await account.get();
+        queryClient.setQueryData(["session", "me"], me);
+        // Ensure session state updates immediately in UI
+        await queryClient.invalidateQueries({ queryKey: ["session", "me"] });
+        navigate({ to: "/dashboard" });
+        toast.success("Sign in successful");
+      } catch (error) {
+        const msg =
+          error instanceof Error ? error.message : "Failed to sign in";
+        toast.error(msg);
+      }
     },
     validators: {
       onSubmit: z.object({
         email: z.email("Invalid email address"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
+        password: z
+          .string()
+          .min(
+            MIN_PASSWORD_LENGTH,
+            `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
+          ),
       }),
     },
   });

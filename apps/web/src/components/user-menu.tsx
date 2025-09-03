@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   DropdownMenu,
@@ -13,6 +14,7 @@ import { Skeleton } from "./ui/skeleton";
 
 export default function UserMenu() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: session, isPending } = authClient.useSession();
 
   if (isPending) {
@@ -30,25 +32,23 @@ export default function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">{session.user.name}</Button>
+        <Button variant="outline">{session.name ?? session.email}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-card">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>{session.user.email}</DropdownMenuItem>
+        <DropdownMenuItem>{session.email}</DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Button
             className="w-full"
-            onClick={() => {
-              authClient.signOut({
-                fetchOptions: {
-                  onSuccess: () => {
-                    navigate({
-                      to: "/",
-                    });
-                  },
-                },
+            onClick={async () => {
+              await authClient.signOut();
+              // Immediately reflect logout in UI
+              queryClient.setQueryData(["session", "me"], null);
+              await queryClient.invalidateQueries({
+                queryKey: ["session", "me"],
               });
+              navigate({ to: "/" });
             }}
             variant="destructive"
           >

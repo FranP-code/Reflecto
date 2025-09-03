@@ -63,13 +63,29 @@ Reflecto/
 
 ## Available Scripts
 
-- `pnpm dev`: Start all applications in development mode
-- `pnpm build`: Build all applications
-- `pnpm dev:web`: Start only the web application
-- `pnpm dev:server`: Start only the server
-- `pnpm check-types`: Check TypeScript types across all apps
-- `pnpm db:push`: Push schema changes to database
-- `pnpm db:studio`: Open database studio UI
-- `cd apps/web && pnpm generate-pwa-assets`: Generate PWA assets
-- `cd apps/web && pnpm desktop:dev`: Start Tauri desktop app in development
-- `cd apps/web && pnpm desktop:build`: Build Tauri desktop app
+
+## Authentication (Appwrite)
+
+The project now uses Appwrite Authentication instead of Better-Auth.
+
+Environment variables:
+
+- Server (`apps/server/.env`)
+	- `APPWRITE_ENDPOINT` — e.g. https://<REGION>.cloud.appwrite.io/v1
+	- `APPWRITE_PROJECT_ID` — your Appwrite Project ID
+
+- Web (`apps/web/.env`)
+	- `VITE_APPWRITE_ENDPOINT` — same endpoint as above
+	- `VITE_APPWRITE_PROJECT_ID` — same project id
+	- `VITE_SERVER_URL` — TRPC server URL (e.g. http://localhost:3000)
+
+How it works:
+
+- Web uses Appwrite's Account SDK to sign up/in and get the current user.
+- For server calls, web obtains a short-lived JWT via `account.createJWT()` and sends it as `Authorization: Bearer <jwt>`.
+- Server initializes an Appwrite Server SDK per request, reads the JWT (or falls back to `a_session_<PROJECT_ID>` cookie), and resolves the user with `account.get()` in TRPC context.
+- Protected routes remain enforced via `protectedProcedure`.
+
+Notes:
+
+- If relying on session cookies from the browser, use a custom domain for Appwrite so cookies are first-party (or enable 3rd-party cookies in local dev).
