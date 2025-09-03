@@ -5,7 +5,6 @@ import { trpcServer } from "@hono/trpc-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger as honoLogger } from "hono/logger";
-import { auth } from "./lib/auth";
 import { createContext } from "./lib/context";
 import { logger } from "./lib/logger";
 import { appRouter } from "./routers/index";
@@ -32,10 +31,10 @@ app.use(
     allowMethods: ["GET", "POST", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-  })
+  }),
 );
 
-app.on(["POST", "GET"], "/api/auth/**", (c) => auth.handler(c.req.raw));
+// Appwrite handles authentication client-side, so we don't need auth routes here
 
 app.use(
   "/trpc/*",
@@ -44,7 +43,7 @@ app.use(
     createContext: (_opts, context) => {
       return createContext({ context });
     },
-  })
+  }),
 );
 
 app.get("/", (c) => {
