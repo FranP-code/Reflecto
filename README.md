@@ -13,7 +13,7 @@ This project was created with [Better-T-Stack](https://github.com/AmanVarshney01
 - **Bun** - Runtime environment
 - **Drizzle** - TypeScript-first ORM
 - **PostgreSQL** - Database engine
-- **Authentication** - Better-Auth
+- **Authentication** - Appwrite
 - **Husky** - Git hooks for code quality
 - **PWA** - Progressive Web App support
 - **Tauri** - Build native desktop applications
