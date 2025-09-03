@@ -1,0 +1,23 @@
+name: Reflecto
+
+services:
+  postgres:
+    image: postgres
+    container_name: Reflecto-postgres
+    environment:
+      POSTGRES_DB: Reflecto
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - Reflecto_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  Reflecto_postgres_data:
