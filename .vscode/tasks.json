@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Install Appwrite SDKs",
+			"type": "shell",
+			"command": "pnpm -w i",
+			"args": []
+		}
+	]
+}
