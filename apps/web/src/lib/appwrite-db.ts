@@ -122,3 +122,30 @@ export async function upsertSpaceSnapshot(
     );
   }
 }
+
+/**
+ * List all space snapshots for a user.
+ */
+export async function listUserSpaceSnapshots(
+  userId?: string
+): Promise<Array<{ row: SpaceSnapshotRow; snapshot: RemoteSnapshot | null }>> {
+  ensureEnv();
+  const uid = userId ?? (await getCurrentUserId());
+  if (!uid) {
+    return [];
+  }
+  const res = (await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+    Query.equal("userId", uid),
+  ])) as Models.DocumentList<Models.Document>;
+
+  return (res.documents ?? []).map((doc) => {
+    const row = doc as unknown as SpaceSnapshotRow;
+    let parsed: RemoteSnapshot | null = null;
+    try {
+      parsed = JSON.parse(row.snapshot) as RemoteSnapshot;
+    } catch {
+      parsed = null;
+    }
+    return { row, snapshot: parsed };
+  });
+}

@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { MoreHorizontal, Plus, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,69 +9,72 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { listUserSpaceSnapshots } from "@/lib/appwrite-db";
+import { authClient } from "@/lib/auth-client";
 
-type Space = {
+type SpaceCard = {
   id: string;
   name: string;
   lastEdited: string;
-  preview: string;
+  snapshotText: string;
   itemCount: number;
   color: string;
 };
 
-// Mock data for demonstration
-const mockSpaces: Space[] = [
-  {
-    id: "1",
-    name: "Product Strategy",
-    lastEdited: "2 hours ago",
-    preview: "/whiteboard-with-product-strategy-diagrams-and-stic.jpg",
-    itemCount: 12,
-    color: "bg-blue-500",
-  },
-  {
-    id: "2",
-    name: "Research Notes",
-    lastEdited: "1 day ago",
-    preview: "/whiteboard-with-research-mind-map-and-connections.jpg",
-    itemCount: 8,
-    color: "bg-green-500",
-  },
-  {
-    id: "3",
-    name: "Meeting Ideas",
-    lastEdited: "3 days ago",
-    preview: "/whiteboard-with-meeting-notes-and-action-items.jpg",
-    itemCount: 15,
-    color: "bg-purple-500",
-  },
-  {
-    id: "4",
-    name: "Design System",
-    lastEdited: "1 week ago",
-    preview: "/whiteboard-with-ui-components-and-design-patterns.jpg",
-    itemCount: 24,
-    color: "bg-orange-500",
-  },
-  {
-    id: "5",
-    name: "Learning Path",
-    lastEdited: "2 weeks ago",
-    preview: "/whiteboard-with-learning-roadmap-and-progress-trac.jpg",
-    itemCount: 6,
-    color: "bg-pink-500",
-  },
-  {
-    id: "6",
-    name: "Project Planning",
-    lastEdited: "3 weeks ago",
-    preview: "/whiteboard-with-project-timeline-and-milestones.jpg",
-    itemCount: 18,
-    color: "bg-cyan-500",
-  },
-];
-
 export function SpacesGrid() {
+  const { data: session } = authClient.useSession();
+
+  const spacesQuery = useQuery({
+    queryKey: ["spaces", session?.$id],
+    queryFn: async () => {
+      if (!session?.$id) {
+        return [] as SpaceCard[];
+      }
+      const rows = await listUserSpaceSnapshots(session.$id);
+      return rows.map(({ row, snapshot }, idx) => {
+        const snapshotText = snapshot
+          ? JSON.stringify(snapshot)
+          : (row.snapshot ?? "");
+        const itemCount = (() => {
+          try {
+            const doc = snapshot?.document as unknown as
+              | {
+                  store?: { records?: Record<string, unknown> };
+                  records?: Record<string, unknown>;
+                }
+              | undefined;
+            const recs = doc?.store?.records ?? doc?.records;
+            return recs ? Object.keys(recs).length : 0;
+          } catch {
+            return 0;
+          }
+        })();
+        const COLORS = [
+          "bg-blue-500",
+          "bg-green-500",
+          "bg-purple-500",
+          "bg-orange-500",
+          "bg-pink-500",
+          "bg-cyan-500",
+        ] as const;
+        return {
+          id: row.spaceId,
+          name: row.spaceId,
+          lastEdited: row.$updatedAt
+            ? new Date(row.$updatedAt).toLocaleString()
+            : "",
+          snapshotText,
+          itemCount,
+          // keep some color variety
+          color: COLORS[idx % COLORS.length],
+        } satisfies SpaceCard;
+      });
+    },
+    staleTime: 10_000,
+  });
+
+  const spaces = spacesQuery.data ?? [];
+
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
@@ -94,13 +98,13 @@ export function SpacesGrid() {
           <Input className="pl-10" placeholder="Search spaces..." />
         </div>
         <Badge className="px-3 py-1" variant="secondary">
-          {mockSpaces.length} spaces
+          {spacesQuery.isLoading ? "Loading…" : `${spaces.length} spaces`}
         </Badge>
       </div>
 
       {/* Spaces Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {mockSpaces.map((space) => (
+        {spaces.map((space) => (
           <Card
             className="group cursor-pointer border-border/50 transition-all duration-200 hover:border-border hover:shadow-lg"
             key={space.id}
@@ -124,14 +128,12 @@ export function SpacesGrid() {
             </CardHeader>
 
             <CardContent className="pb-3">
-              {/* Whiteboard Preview */}
+              {/* Stringified snapshot preview (temporary) */}
               <div className="relative overflow-hidden rounded-lg border border-border/30 bg-muted/30">
-                <img
-                  alt={`${space.name} preview`}
-                  className="h-32 w-full object-cover transition-transform duration-200 group-hover:scale-105"
-                  src={space.preview || "/placeholder.svg"}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent" />
+                <pre className="h-32 w-full overflow-auto p-2 text-xs leading-tight">
+                  {space.snapshotText}
+                </pre>
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/10 to-transparent" />
               </div>
             </CardContent>
 
@@ -144,7 +146,7 @@ export function SpacesGrid() {
       </div>
 
       {/* Empty State (when no spaces exist) */}
-      {mockSpaces.length === 0 && (
+      {!spacesQuery.isLoading && spaces.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
             <Plus className="h-8 w-8 text-muted-foreground" />
