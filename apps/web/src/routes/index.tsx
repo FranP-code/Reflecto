@@ -102,7 +102,7 @@ function FeatureTile({ feature }: { feature: Feature }) {
     <div
       className={`group relative h-full rounded-2xl bg-gradient-to-br p-[1px] ${feature.from} ${feature.to}`}
     >
-      <div className="relative h-full rounded-2xl border bg-white/5 p-6 backdrop-blur transition-all duration-300 group-hover:border-white/40 sm:p-7">
+      <div className="relative h-full overflow-hidden rounded-2xl border bg-white/5 p-6 backdrop-blur transition-all duration-300 group-hover:border-white/40 sm:p-7">
         <div className="flex items-start gap-3">
           <div className="rounded-lg border bg-white/10 p-2 backdrop-blur">
             <Icon className="size-5" />
