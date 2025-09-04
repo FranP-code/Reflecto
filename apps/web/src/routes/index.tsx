@@ -21,16 +21,19 @@ export const Route = createFileRoute("/")({
 
 function HealthBadge() {
   const healthCheck = useQuery(trpc.healthCheck.queryOptions());
-  const status = healthCheck.isLoading
-    ? "Checking"
-    : healthCheck.data
-      ? "Online"
-      : "Offline";
-  const color = healthCheck.isLoading
-    ? "bg-yellow-500"
-    : healthCheck.data
-      ? "bg-emerald-500"
-      : "bg-red-500";
+  let status = "Offline";
+  if (healthCheck.isLoading) {
+    status = "Checking";
+  } else if (healthCheck.data) {
+    status = "Online";
+  }
+  // flatten ternaries for linter by using simple logic
+  let color = "bg-red-500";
+  if (healthCheck.isLoading) {
+    color = "bg-yellow-500";
+  } else if (healthCheck.data) {
+    color = "bg-emerald-500";
+  }
   return (
     <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-muted-foreground text-xs backdrop-blur">
       <span className={`h-2 w-2 rounded-full ${color}`} />
@@ -309,12 +312,9 @@ function HomeComponent() {
               </Button>
             </div>
             <div className="mt-8 flex items-center gap-3 text-muted-foreground text-xs">
-              <img
-                alt="Reflecto"
-                className="h-5 w-5 rounded-sm"
-                height="20"
-                src="/logo.png"
-                width="20"
+              <span
+                aria-hidden
+                className="inline-block h-5 w-5 rounded-sm bg-gradient-to-br from-purple-500 to-fuchsia-500"
               />
               <span>Private by default • Powered by lightweight AI</span>
             </div>
@@ -395,26 +395,6 @@ function HomeComponent() {
             </div>
           </div>
         </section>
-
-        {/* Footer */}
-        <footer className="container mx-auto max-w-7xl px-4 pt-4 pb-10 text-muted-foreground text-xs">
-          <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
-            <div className="flex items-center gap-2">
-              <img
-                alt="Reflecto"
-                className="h-4 w-4 rounded-sm"
-                height="16"
-                src="/logo.png"
-                width="16"
-              />
-              <span>Reflecto</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link to="/">Home</Link>
-              <Link to="/dashboard">Dashboard</Link>
-            </div>
-          </div>
-        </footer>
       </div>
     </>
   );
