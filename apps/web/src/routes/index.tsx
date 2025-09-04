@@ -10,6 +10,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import type { ComponentType } from "react";
+import DotGrid from "@/components/DotGrid";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/utils/trpc";
@@ -264,129 +265,151 @@ const FEATURES: Feature[] = [
 
 function HomeComponent() {
   return (
-    <div className="relative">
-      {/* Hero */}
-      <section className="container mx-auto max-w-7xl px-4 pt-14 pb-24 sm:pt-20 sm:pb-32">
-        <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-          <HealthBadge />
-          <h1 className="mt-6 animate-shine bg-[linear-gradient(120deg,white,white_40%,rgba(255,255,255,0.7)_60%,rgba(255,255,255,0.3))] bg-clip-text font-semibold text-5xl text-transparent leading-tight [background-size:200%_100%] sm:text-6xl md:text-7xl lg:text-8xl">
-            Reflecto
-          </h1>
-          <p className="mt-5 text-balance text-lg text-muted-foreground sm:text-xl">
-            Your AI‑powered second brain. Capture voice, images, and
-            text—Reflecto turns it into a searchable, connected knowledge base.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild size="lg">
-              <Link to="/login">
-                <Sparkles className="mr-2 size-4" /> Get started
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="secondary">
-              <Link to="/dashboard">View dashboard</Link>
-            </Button>
-          </div>
-          <div className="mt-8 flex items-center gap-3 text-muted-foreground text-xs">
-            <img
-              alt="Reflecto"
-              className="h-5 w-5 rounded-sm"
-              height="20"
-              src="/logo.png"
-              width="20"
-            />
-            <span>Private by default • Powered by lightweight AI</span>
-          </div>
-        </div>
-        {/* Showcase preview */}
-        <div className="mt-12 sm:mt-16">
-          <PreviewCard />
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="container mx-auto max-w-7xl px-4 py-16 sm:py-24">
-        {/* quick stats */}
-        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-4 pb-8 text-center sm:grid-cols-4">
-          {[
-            { n: "2x", l: "Faster capture" },
-            { n: "100%", l: "Private by default" },
-            { n: "< 1s", l: "Search latency" },
-            { n: "∞", l: "Ideas connected" },
-          ].map((s) => (
-            <div className="rounded-lg border bg-white/5 p-4" key={s.l}>
-              <div className="font-semibold text-3xl sm:text-4xl">{s.n}</div>
-              <div className="text-muted-foreground text-xs">{s.l}</div>
-            </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-          {FEATURES.map((f) => (
-            <FeatureTile feature={f} key={f.key} />
-          ))}
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className="container mx-auto max-w-7xl px-4 py-24 sm:py-32">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-muted-foreground text-sm backdrop-blur-sm">
-            <Sparkles className="h-4 w-4" />
-            <span>How it works</span>
-          </div>
-          <h2 className="text-balance font-bold text-4xl sm:text-5xl lg:text-6xl">
-            From chaos to clarity
-          </h2>
-          <p className="mt-6 text-lg text-muted-foreground sm:text-xl">
-            Transform scattered thoughts into organized knowledge in four
-            seamless steps.
-          </p>
-        </div>
-        <HowItWorks />
-      </section>
-
-      {/* Call to action */}
-      <section className="container mx-auto max-w-6xl px-4 pt-6 pb-24">
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-8 sm:p-10">
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <div>
-              <h3 className="text-balance font-semibold text-2xl sm:text-3xl">
-                Build your second brain
-              </h3>
-              <p className="text-muted-foreground">
-                Start free. Your knowledge stays private.
-              </p>
-            </div>
-            <div className="flex gap-3">
+    <>
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          position: "fixed",
+        }}
+      >
+        <DotGrid
+          activeColor="#525151"
+          baseColor="#281E37"
+          dotSize={5}
+          gap={15}
+          proximity={120}
+          resistance={750}
+          returnDuration={1.5}
+          shockRadius={250}
+          shockStrength={5}
+        />
+      </div>
+      <div className="relative">
+        {/* Hero */}
+        <section className="container mx-auto max-w-7xl px-4 pt-14 pb-24 sm:pt-20 sm:pb-32">
+          <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+            <HealthBadge />
+            <h1 className="mt-6 animate-shine bg-[linear-gradient(120deg,white,white_40%,rgba(255,255,255,0.7)_60%,rgba(255,255,255,0.3))] bg-clip-text font-semibold text-5xl text-transparent leading-tight [background-size:200%_100%] sm:text-6xl md:text-7xl lg:text-8xl">
+              Reflecto
+            </h1>
+            <p className="mt-5 text-balance text-lg text-muted-foreground sm:text-xl">
+              Your AI‑powered second brain. Capture voice, images, and
+              text—Reflecto turns it into a searchable, connected knowledge
+              base.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Button asChild size="lg">
-                <Link to="/login">Create account</Link>
+                <Link to="/login">
+                  <Sparkles className="mr-2 size-4" /> Get started
+                </Link>
               </Button>
               <Button asChild size="lg" variant="secondary">
-                <Link to="/dashboard">Go to app</Link>
+                <Link to="/dashboard">View dashboard</Link>
               </Button>
             </div>
+            <div className="mt-8 flex items-center gap-3 text-muted-foreground text-xs">
+              <img
+                alt="Reflecto"
+                className="h-5 w-5 rounded-sm"
+                height="20"
+                src="/logo.png"
+                width="20"
+              />
+              <span>Private by default • Powered by lightweight AI</span>
+            </div>
           </div>
-        </div>
-      </section>
+          {/* Showcase preview */}
+          <div className="mt-12 sm:mt-16">
+            <PreviewCard />
+          </div>
+        </section>
 
-      {/* Footer */}
-      <footer className="container mx-auto max-w-7xl px-4 pt-4 pb-10 text-muted-foreground text-xs">
-        <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
-          <div className="flex items-center gap-2">
-            <img
-              alt="Reflecto"
-              className="h-4 w-4 rounded-sm"
-              height="16"
-              src="/logo.png"
-              width="16"
-            />
-            <span>Reflecto</span>
+        {/* Features */}
+        <section className="container mx-auto max-w-7xl px-4 py-16 sm:py-24">
+          {/* quick stats */}
+          <div className="mx-auto grid max-w-4xl grid-cols-2 gap-4 pb-8 text-center sm:grid-cols-4">
+            {[
+              { n: "2x", l: "Faster capture" },
+              { n: "100%", l: "Private by default" },
+              { n: "< 1s", l: "Search latency" },
+              { n: "∞", l: "Ideas connected" },
+            ].map((s) => (
+              <div className="rounded-lg border bg-white/5 p-4" key={s.l}>
+                <div className="font-semibold text-3xl sm:text-4xl">{s.n}</div>
+                <div className="text-muted-foreground text-xs">{s.l}</div>
+              </div>
+            ))}
           </div>
-          <div className="flex items-center gap-4">
-            <Link to="/">Home</Link>
-            <Link to="/dashboard">Dashboard</Link>
+          <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+            {FEATURES.map((f) => (
+              <FeatureTile feature={f} key={f.key} />
+            ))}
           </div>
-        </div>
-      </footer>
-    </div>
+        </section>
+
+        {/* How it works */}
+        <section className="container mx-auto max-w-7xl px-4 py-24 sm:py-32">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-muted-foreground text-sm backdrop-blur-sm">
+              <Sparkles className="h-4 w-4" />
+              <span>How it works</span>
+            </div>
+            <h2 className="text-balance font-bold text-4xl sm:text-5xl lg:text-6xl">
+              From chaos to clarity
+            </h2>
+            <p className="mt-6 text-lg text-muted-foreground sm:text-xl">
+              Transform scattered thoughts into organized knowledge in four
+              seamless steps.
+            </p>
+          </div>
+          <HowItWorks />
+        </section>
+
+        {/* Call to action */}
+        <section className="container mx-auto max-w-6xl px-4 pt-6 pb-24">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-8 sm:p-10">
+            <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+              <div>
+                <h3 className="text-balance font-semibold text-2xl sm:text-3xl">
+                  Build your second brain
+                </h3>
+                <p className="text-muted-foreground">
+                  Start free. Your knowledge stays private.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button asChild size="lg">
+                  <Link to="/login">Create account</Link>
+                </Button>
+                <Button asChild size="lg" variant="secondary">
+                  <Link to="/dashboard">Go to app</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="container mx-auto max-w-7xl px-4 pt-4 pb-10 text-muted-foreground text-xs">
+          <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
+            <div className="flex items-center gap-2">
+              <img
+                alt="Reflecto"
+                className="h-4 w-4 rounded-sm"
+                height="16"
+                src="/logo.png"
+                width="16"
+              />
+              <span>Reflecto</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link to="/">Home</Link>
+              <Link to="/dashboard">Dashboard</Link>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </>
   );
 }
