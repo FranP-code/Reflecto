@@ -30,7 +30,12 @@ function SpaceRoute() {
 
   return (
     <div className="mx-4 mt-4" style={{ position: "relative", inset: 0 }}>
-      <Tldraw inferDarkMode persistenceKey={persistenceKey} />
+      <Tldraw
+        onMount={(editor) => {
+          editor.user.updateUserPreferences({ colorScheme: "dark" });
+        }}
+        persistenceKey={persistenceKey}
+      />
     </div>
   );
 }
