@@ -154,6 +154,9 @@ export function SpacesGrid() {
                   }}
                   className="min-h-52"
                   hideUi
+                  onMount={(editor) => {
+                    editor.updateInstanceState({ isReadonly: true });
+                  }}
                   snapshot={JSON.parse(space.snapshotText).document}
                 />
               </div>
