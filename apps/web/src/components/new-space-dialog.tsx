@@ -68,7 +68,7 @@ export function NewSpaceDialog({
   return (
     <Dialog>
       <DialogTrigger>{triggerButton || defaultTrigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" style={{ zIndex: 201 }}>
         <DialogHeader>
           <DialogTitle>Create New Space</DialogTitle>
           <DialogDescription>

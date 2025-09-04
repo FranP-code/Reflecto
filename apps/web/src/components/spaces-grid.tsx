@@ -71,11 +71,6 @@ export function SpacesGrid() {
 
   return (
     <div className="space-y-6 p-6">
-      <style>
-        {`.tl-watermark_SEE-LICENSE {
-          z-index: 1 !important;
-        }`}
-      </style>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
