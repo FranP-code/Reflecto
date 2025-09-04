@@ -3,9 +3,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
@@ -34,30 +33,26 @@ export default function UserMenu() {
       <DropdownMenuTrigger>
         <Button variant="outline">{session.name ?? session.email}</Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-card">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>{session.email}</DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link to="/verify-email">Verify Email</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link to="/password">Password</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={async () => {
-            await authClient.signOut();
-            // Immediately reflect logout in UI
-            queryClient.setQueryData(["session", "me"], null);
-            await queryClient.invalidateQueries({
-              queryKey: ["session", "me"],
-            });
-            navigate({ to: "/" });
-          }}
-          variant="destructive"
-        >
-          Sign Out
-        </DropdownMenuItem>
+      <DropdownMenuContent
+        className="relative bg-card"
+        style={{ zIndex: 1000 }}
+      >
+        <DropdownMenuGroup>
+          <DropdownMenuItem
+            onClick={async () => {
+              await authClient.signOut();
+              // Immediately reflect logout in UI
+              queryClient.setQueryData(["session", "me"], null);
+              await queryClient.invalidateQueries({
+                queryKey: ["session", "me"],
+              });
+              navigate({ to: "/" });
+            }}
+            variant="destructive"
+          >
+            Sign Out
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
