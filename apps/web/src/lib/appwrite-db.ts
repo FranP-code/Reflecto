@@ -196,3 +196,74 @@ export async function listUserSpaceSnapshots(
     return { row, snapshot: parsed };
   });
 }
+
+/**
+ * Update a space's metadata (title/color) identified by spaceId for the current (or provided) user.
+ */
+export async function updateSpace(args: {
+  spaceId: string;
+  title?: string;
+  color?: string;
+  userId?: string;
+}): Promise<void> {
+  ensureEnv();
+  const uid = args.userId ?? (await getCurrentUserId());
+  if (!uid) {
+    throw new Error("Not authenticated");
+  }
+
+  const res = (await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+    Query.equal("spaceId", args.spaceId),
+    Query.equal("userId", uid),
+  ])) as Models.DocumentList<Models.Document>;
+
+  const existing = res.documents?.[0] as Models.Document | undefined;
+  if (!existing) {
+    throw new Error("Space not found");
+  }
+
+  const patch: Record<string, unknown> = {};
+  if (typeof args.title === "string") {
+    patch.title = args.title;
+  }
+  if (typeof args.color === "string") {
+    patch.color = args.color;
+  }
+
+  if (Object.keys(patch).length === 0) {
+    return; // nothing to update
+  }
+
+  await databases.updateDocument(
+    DATABASE_ID,
+    COLLECTION_ID,
+    existing.$id,
+    patch
+  );
+}
+
+/**
+ * Delete a space (document) identified by spaceId for the current (or provided) user.
+ */
+export async function deleteSpace(args: {
+  spaceId: string;
+  userId?: string;
+}): Promise<void> {
+  ensureEnv();
+  const uid = args.userId ?? (await getCurrentUserId());
+  if (!uid) {
+    throw new Error("Not authenticated");
+  }
+
+  const res = (await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+    Query.equal("spaceId", args.spaceId),
+    Query.equal("userId", uid),
+  ])) as Models.DocumentList<Models.Document>;
+
+  const existing = res.documents?.[0] as Models.Document | undefined;
+  if (!existing) {
+    throw new Error("Space not found");
+  }
+
+  await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, existing.$id);
+}
