@@ -4,7 +4,7 @@
 - [] On space, validate that id is valid and created by the user
 - [] On dashboard, create the space on db and then redirect to it
 - [] Save on DB snapshots every time user makes a change https://arc.net/l/quote/ywfcqjvp
-- [] See the native integration of tldraw ai https://github.com/tldraw/tldraw/tree/main/packages/ai
+- [x] See the native integration of tldraw ai https://github.com/tldraw/tldraw/tree/main/packages/ai
 - [] Header should be hidden on space view and shown on hover
 - [] Show space title on space view
 - [] Add dialog to create new space from dashboard
