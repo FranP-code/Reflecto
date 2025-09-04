@@ -31,29 +31,26 @@ export default function UserMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger>
         <Button variant="outline">{session.name ?? session.email}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-card">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>{session.email}</DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Button
-            className="w-full"
-            onClick={async () => {
-              await authClient.signOut();
-              // Immediately reflect logout in UI
-              queryClient.setQueryData(["session", "me"], null);
-              await queryClient.invalidateQueries({
-                queryKey: ["session", "me"],
-              });
-              navigate({ to: "/" });
-            }}
-            variant="destructive"
-          >
-            Sign Out
-          </Button>
+        <DropdownMenuItem
+          onClick={async () => {
+            await authClient.signOut();
+            // Immediately reflect logout in UI
+            queryClient.setQueryData(["session", "me"], null);
+            await queryClient.invalidateQueries({
+              queryKey: ["session", "me"],
+            });
+            navigate({ to: "/" });
+          }}
+          variant="destructive"
+        >
+          Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

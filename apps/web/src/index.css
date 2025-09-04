@@ -122,9 +122,12 @@ body {
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-button {
+button,
+[role="menuitem"] {
   @apply transition-colors disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
 }
+
+/* role="menuitem" selector */
 
 @layer base {
   * {

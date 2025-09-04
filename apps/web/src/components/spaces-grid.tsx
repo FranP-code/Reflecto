@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { MoreHorizontal, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Tldraw } from "tldraw";
 import { NewSpaceDialog } from "@/components/new-space-dialog";
+import { SpaceActions } from "@/components/space-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -170,13 +171,12 @@ export function SpacesGrid() {
                       {space.name}
                     </h3>
                   </div>
-                  <Button
-                    className="h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-                    size="sm"
-                    variant="ghost"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                  <SpaceActions
+                    onDeleted={() => spacesQuery.refetch()}
+                    onUpdated={() => spacesQuery.refetch()}
+                    space={space}
+                    userId={session?.$id}
+                  />
                 </div>
               </CardHeader>
 
@@ -257,3 +257,5 @@ export function SpacesGrid() {
     </div>
   );
 }
+
+// Inlined action/dialog components moved to dedicated files for reuse
