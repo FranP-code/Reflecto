@@ -74,38 +74,6 @@ export default function Header() {
           </div>
         </div>
       </div>
-
-      {/* Decorative blobs for subtle flair matching landing visuals */}
-      <div
-        className={[
-          "absolute",
-          "-z-10",
-          "left-0",
-          "top-0",
-          "h-40",
-          "w-40",
-          "rounded-full",
-          "bg-gradient-to-br",
-          "from-purple-500/30",
-          "to-fuchsia-500/20",
-          "blur-3xl",
-        ].join(" ")}
-      />
-      <div
-        className={[
-          "absolute",
-          "-z-10",
-          "right-10",
-          "top-0",
-          "h-56",
-          "w-56",
-          "rounded-full",
-          "bg-gradient-to-br",
-          "from-cyan-400/25",
-          "to-emerald-400/15",
-          "blur-3xl",
-        ].join(" ")}
-      />
     </header>
   );
 }
