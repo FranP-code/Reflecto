@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { ComponentType } from "react";
 import DotGrid from "@/components/DotGrid";
+import ShinyText from "@/components/ShinyText";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/utils/trpc";
@@ -293,9 +294,15 @@ function HomeComponent() {
         <section className="container mx-auto max-w-7xl px-4 pt-14 pb-24 sm:pt-20 sm:pb-32">
           <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
             <HealthBadge />
-            <h1 className="mt-6 animate-shine bg-[linear-gradient(120deg,white,white_40%,rgba(255,255,255,0.7)_60%,rgba(255,255,255,0.3))] bg-clip-text font-semibold text-5xl text-transparent leading-tight [background-size:200%_100%] sm:text-6xl md:text-7xl lg:text-8xl">
+            {/* <h1 className="mt-6 animate-shine bg-[linear-gradient(120deg,white,white_40%,rgba(255,255,255,0.7)_60%,rgba(255,255,255,0.3))] bg-clip-text font-semibold text-5xl text-transparent leading-tight [background-size:200%_100%] sm:text-6xl md:text-7xl lg:text-8xl">
               Reflecto
-            </h1>
+            </h1> */}
+            <ShinyText
+              className="mt-6 animate-shine font-semibold text-5xl leading-tight sm:text-6xl md:text-7xl lg:text-8xl"
+              speed={3}
+              text="Reflecto"
+              type="h1"
+            />
             <p className="mt-5 text-balance text-lg text-muted-foreground sm:text-xl">
               Your AI‑powered second brain. Capture voice, images, and
               text—Reflecto turns it into a searchable, connected knowledge
