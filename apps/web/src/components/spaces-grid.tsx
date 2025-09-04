@@ -109,6 +109,9 @@ export function SpacesGrid() {
           <Card
             className="group cursor-pointer border-border/50 transition-all duration-200 hover:border-border hover:shadow-lg"
             key={space.id}
+            onClick={() => {
+              window.location.href = `/space?id=${space.id}`;
+            }}
           >
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
