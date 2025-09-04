@@ -1,0 +1,7 @@
+- [] Verify email functionality
+- [] Reset password functionality
+- [] Video/demo with code about how works the app
+- [] On space, validate that id is valid
+- [] On dashboard, create the space on db and then redirect to it
+- [] Save on DB snapshots every time user makes a change https://arc.net/l/quote/ywfcqjvp
+- [] See the native integration of tldraw ai https://github.com/tldraw/tldraw/tree/main/packages/ai
