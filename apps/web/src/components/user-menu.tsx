@@ -38,6 +38,12 @@ export default function UserMenu() {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>{session.email}</DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link to="/verify-email">Verify Email</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link to="/password">Password</Link>
+        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={async () => {
             await authClient.signOut();

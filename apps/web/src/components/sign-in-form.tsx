@@ -2,7 +2,7 @@ const MIN_PASSWORD_LENGTH = 8;
 
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
 import { account, authClient } from "@/lib/auth-client";
@@ -53,7 +53,7 @@ export default function SignInForm({
           .string()
           .min(
             MIN_PASSWORD_LENGTH,
-            `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
+            `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
           ),
       }),
     },
@@ -134,7 +134,17 @@ export default function SignInForm({
         </form.Subscribe>
       </form>
 
-      <div className="mt-4 text-center">
+      <div className="mt-4 space-y-2 text-center">
+        <div className="flex items-center justify-between">
+          <Button asChild variant="link" className="px-0">
+            <Link to="/password" search={{ mode: "recover" }}>
+              Forgot password?
+            </Link>
+          </Button>
+          <Button asChild variant="link" className="px-0">
+            <Link to="/verify-email">Verify your email</Link>
+          </Button>
+        </div>
         <Button
           className="text-indigo-600 hover:text-indigo-800"
           onClick={onSwitchToSignUp}

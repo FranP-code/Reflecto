@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
 import { account, authClient } from "@/lib/auth-client";
@@ -39,7 +39,7 @@ export default function SignUpForm({
         const me = await account.get();
         queryClient.setQueryData(["session", "me"], me);
         await queryClient.invalidateQueries({ queryKey: ["session", "me"] });
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/verify-email" });
         toast.success("Sign up successful");
       } catch (error) {
         const msg =
@@ -55,7 +55,7 @@ export default function SignUpForm({
           .string()
           .min(
             MIN_PASSWORD_LENGTH,
-            `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
+            `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
           ),
       }),
     },
@@ -158,14 +158,19 @@ export default function SignUpForm({
         </form.Subscribe>
       </form>
 
-      <div className="mt-4 text-center">
-        <Button
-          className="text-indigo-600 hover:text-indigo-800"
-          onClick={onSwitchToSignIn}
-          variant="link"
-        >
-          Already have an account? Sign In
-        </Button>
+      <div className="mt-4 space-y-2 text-center">
+        <div className="flex items-center justify-between">
+          <Button asChild variant="link" className="px-0">
+            <Link to="/verify-email">Verify your email</Link>
+          </Button>
+          <Button
+            className="text-indigo-600 hover:text-indigo-800"
+            onClick={onSwitchToSignIn}
+            variant="link"
+          >
+            Already have an account? Sign In
+          </Button>
+        </div>
       </div>
     </div>
   );
