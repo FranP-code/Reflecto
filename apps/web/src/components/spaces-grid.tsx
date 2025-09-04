@@ -1,19 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
-import { MoreHorizontal, Plus, Search } from "lucide-react";
+import { Edit, MoreHorizontal, Plus, Search, Trash } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Tldraw } from "tldraw";
+import { DeleteSpaceDialog } from "@/components/delete-space-dialog";
+import { EditSpaceDialog } from "@/components/edit-space-dialog";
 import { NewSpaceDialog } from "@/components/new-space-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { listUserSpaceSnapshots } from "@/lib/appwrite-db";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 
 type SpaceCard = {
   id: string;
@@ -170,13 +179,54 @@ export function SpacesGrid() {
                       {space.name}
                     </h3>
                   </div>
-                  <Button
-                    className="h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-                    size="sm"
-                    variant="ghost"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      aria-label="Open space actions"
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "sm" }),
+                        "h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+                      )}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onKeyDown={(e) => {
+                        // Prevent Enter/Space bubbling to Card
+                        e.stopPropagation();
+                      }}
+                      onPointerDown={(e) => {
+                        e.stopPropagation();
+                      }}
+                      type="button"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <EditSpaceDialog
+                        initialColor={space.color}
+                        initialTitle={space.name}
+                        onUpdated={() => spacesQuery.refetch()}
+                        spaceId={space.id}
+                        trigger={
+                          <DropdownMenuItem>
+                            <Edit className="h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                        }
+                      />
+                      <DeleteSpaceDialog
+                        onDeleted={() => spacesQuery.refetch()}
+                        spaceId={space.id}
+                        spaceTitle={space.name}
+                        trigger={
+                          <DropdownMenuItem variant="destructive">
+                            <Trash className="h-4 w-4" /> Delete
+                          </DropdownMenuItem>
+                        }
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </CardHeader>
 
