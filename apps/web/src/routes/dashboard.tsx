@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { SpacesGrid } from "@/components/spaces-grid";
 import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/utils/trpc";
 
@@ -32,6 +33,7 @@ function RouteComponent() {
       <h1>Dashboard</h1>
       <p>Welcome {session?.name ?? session?.email}</p>
       <p>privateData: {privateData.data?.message}</p>
+      <SpacesGrid />
     </div>
   );
 }
