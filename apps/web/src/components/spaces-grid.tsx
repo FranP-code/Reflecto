@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { MoreHorizontal, Plus, Search } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Tldraw } from "tldraw";
 import { NewSpaceDialog } from "@/components/new-space-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -69,6 +70,42 @@ export function SpacesGrid() {
 
   const spaces = spacesQuery.data ?? [];
 
+  // Use an uncontrolled input and a ref-based debounce to avoid rerendering
+  // on every keystroke. We only update `debouncedSearchTerm` after the
+  // debounce delay.
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const timerRef = useRef<number | null>(null);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const DEBOUNCE_MS = 200;
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
+
+  const filteredSpaces = useMemo(() => {
+    const q = debouncedSearchTerm.trim().toLowerCase();
+    if (!q) {
+      return spaces;
+    }
+
+    return spaces.filter((s) => {
+      return s.name.toLowerCase().includes(q);
+    });
+  }, [spaces, debouncedSearchTerm]);
+
+  let badgeText = "";
+  if (spacesQuery.isLoading) {
+    badgeText = "Loading…";
+  } else if (debouncedSearchTerm) {
+    badgeText = `${filteredSpaces.length} of ${spaces.length} spaces`;
+  } else {
+    badgeText = `${spaces.length} spaces`;
+  }
+
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
@@ -86,16 +123,31 @@ export function SpacesGrid() {
       <div className="flex items-center gap-4">
         <div className="relative max-w-md flex-1">
           <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
-          <Input className="pl-10" placeholder="Search spaces..." />
+          <Input
+            className="pl-10"
+            onChange={() => {
+              if (timerRef.current) {
+                clearTimeout(timerRef.current);
+              }
+              // Use window.setTimeout so the returned id is a number
+              timerRef.current = window.setTimeout(() => {
+                const value = inputRef.current?.value ?? "";
+                setDebouncedSearchTerm(value);
+                timerRef.current = null;
+              }, DEBOUNCE_MS);
+            }}
+            placeholder="Search spaces..."
+            ref={inputRef}
+          />
         </div>
         <Badge className="px-3 py-1" variant="secondary">
-          {spacesQuery.isLoading ? "Loading…" : `${spaces.length} spaces`}
+          {badgeText}
         </Badge>
       </div>
 
       {/* Spaces Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {spaces.map((space) => (
+        {filteredSpaces.map((space) => (
           <Card
             className="group cursor-pointer border-border/50 transition-all duration-200 hover:border-border hover:shadow-lg"
             key={space.id}
@@ -171,7 +223,7 @@ export function SpacesGrid() {
       </div>
 
       {/* Empty State (when no spaces exist) */}
-      {!spacesQuery.isLoading && spaces.length === 0 && (
+      {!spacesQuery.isLoading && filteredSpaces.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
             <Plus className="h-8 w-8 text-muted-foreground" />
