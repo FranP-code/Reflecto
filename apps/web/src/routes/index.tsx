@@ -368,7 +368,7 @@ function HomeComponent() {
 
         {/* Call to action */}
         <section className="container mx-auto max-w-6xl px-4 pt-6 pb-24">
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.08] p-8 sm:p-10">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gray-800/[0.5] p-8 sm:p-10">
             {/* Decorative gradient blobs behind content to increase contrast */}
             <div className="-left-8 -top-8 pointer-events-none absolute h-56 w-56 rounded-full bg-gradient-to-br from-purple-500/30 to-fuchsia-500/20 opacity-60 blur-3xl" />
             <div className="-right-12 -bottom-8 pointer-events-none absolute h-72 w-72 rounded-full bg-gradient-to-br from-cyan-400/25 to-emerald-400/15 opacity-50 blur-3xl" />
