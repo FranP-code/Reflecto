@@ -2,14 +2,14 @@ import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DeleteSpaceDialog } from "@/components/delete-space-dialog";
 import { EditSpaceDialog } from "@/components/edit-space-dialog";
-import { Button } from "@/components/ui/button";
-import type { ColorValue } from "@/components/ui/color-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/base-dropdown-menu";
+import { Button } from "@/components/ui/button";
+import type { ColorValue } from "@/components/ui/color-picker";
 import { deleteSpace, updateSpace } from "@/lib/appwrite-db";
 
 export type SpaceActionsProps = {
