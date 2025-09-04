@@ -100,6 +100,8 @@ export async function upsertSpaceSnapshot(
     spaceId,
     userId: uid,
     snapshot: JSON.stringify(payload),
+    title: existing?.title,
+    color: existing?.color,
   } as const;
 
   if (existing) {

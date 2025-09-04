@@ -9,6 +9,7 @@ import {
 } from "tldraw";
 import { z } from "zod";
 import "tldraw/tldraw.css";
+import Loader from "@/components/loader";
 import {
   getLatestSpaceSnapshot,
   type RemoteSnapshot,
@@ -77,6 +78,10 @@ function SpaceRoute() {
       cancelled = true;
     };
   }, [id, session, store]);
+
+  if (!(id && session)) {
+    return <Loader />;
+  }
 
   return (
     <div className="mx-4 mt-4" style={{ position: "relative", inset: 0 }}>

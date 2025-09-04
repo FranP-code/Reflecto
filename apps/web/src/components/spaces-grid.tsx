@@ -147,79 +147,80 @@ export function SpacesGrid() {
 
       {/* Spaces Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredSpaces.map((space) => (
-          <Card
-            className="group cursor-pointer border-border/50 transition-all duration-200 hover:border-border hover:shadow-lg"
-            key={space.id}
-            onClick={() => {
-              window.location.href = `/space?id=${space.id}`;
-            }}
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: space.color }}
-                  />
-                  <h3 className="font-semibold text-foreground transition-colors group-hover:text-primary">
-                    {space.name}
-                  </h3>
+        {filteredSpaces.map((space) => {
+          const snapshot = space.snapshotText
+            ? JSON.parse(space.snapshotText).document
+            : undefined;
+          return (
+            <Card
+              className="group cursor-pointer border-border/50 transition-all duration-200 hover:border-border hover:shadow-lg"
+              key={space.id}
+              onClick={() => {
+                window.location.href = `/space?id=${space.id}`;
+              }}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-3 w-3 rounded-full"
+                      style={{ backgroundColor: space.color }}
+                    />
+                    <h3 className="font-semibold text-foreground transition-colors group-hover:text-primary">
+                      {space.name}
+                    </h3>
+                  </div>
+                  <Button
+                    className="h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+                    size="sm"
+                    variant="ghost"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button
-                  className="h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-                  size="sm"
-                  variant="ghost"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
+              </CardHeader>
 
-            <CardContent className="pb-3">
-              <div className="relative inset-0 min-h-52 min-w-64 overflow-hidden rounded-lg border border-border/30 bg-muted/30">
-                <Tldraw
-                  cameraOptions={{
-                    constraints: {
-                      initialZoom: "fit-min",
-                      bounds: {
-                        x: 0,
-                        y: 0,
-                        w: 9000,
-                        h: 9000,
+              <CardContent className="pb-3">
+                <div className="relative inset-0 min-h-52 min-w-64 overflow-hidden rounded-lg border border-border/30 bg-muted/30">
+                  <Tldraw
+                    cameraOptions={{
+                      constraints: {
+                        initialZoom: "fit-min",
+                        bounds: {
+                          x: 0,
+                          y: 0,
+                          w: 9000,
+                          h: 9000,
+                        },
+                        baseZoom: "fit-min",
+                        behavior: "fixed",
+                        origin: {
+                          x: 0,
+                          y: 0,
+                        },
+                        padding: {
+                          x: 0.1,
+                          y: 0.1,
+                        },
                       },
-                      baseZoom: "fit-min",
-                      behavior: "fixed",
-                      origin: {
-                        x: 0,
-                        y: 0,
-                      },
-                      padding: {
-                        x: 0.1,
-                        y: 0.1,
-                      },
-                    },
-                  }}
-                  className="min-h-52"
-                  hideUi
-                  onMount={(editor) => {
-                    editor.updateInstanceState({ isReadonly: true });
-                  }}
-                  snapshot={
-                    space.snapshotText
-                      ? JSON.parse(space.snapshotText).document
-                      : undefined
-                  }
-                />
-              </div>
-            </CardContent>
+                    }}
+                    className="min-h-52"
+                    hideUi
+                    onMount={(editor) => {
+                      editor.updateInstanceState({ isReadonly: true });
+                    }}
+                    snapshot={snapshot}
+                  />
+                </div>
+              </CardContent>
 
-            <CardFooter className="flex items-center justify-between pt-0 text-muted-foreground text-sm">
-              <span>{space.itemCount} items</span>
-              <span>Edited {space.lastEdited}</span>
-            </CardFooter>
-          </Card>
-        ))}
+              <CardFooter className="flex items-center justify-between pt-0 text-muted-foreground text-sm">
+                <span>{snapshot?.itemCount} items</span>
+                <span>Edited {space.lastEdited}</span>
+              </CardFooter>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Empty State (when no spaces exist) */}
