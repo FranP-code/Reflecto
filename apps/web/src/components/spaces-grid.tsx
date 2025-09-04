@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { MoreHorizontal, Plus, Search } from "lucide-react";
+import { Tldraw } from "tldraw";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -128,12 +129,33 @@ export function SpacesGrid() {
             </CardHeader>
 
             <CardContent className="pb-3">
-              {/* Stringified snapshot preview (temporary) */}
-              <div className="relative overflow-hidden rounded-lg border border-border/30 bg-muted/30">
-                <pre className="h-32 w-full overflow-auto p-2 text-xs leading-tight">
-                  {space.snapshotText}
-                </pre>
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/10 to-transparent" />
+              <div className="relative inset-0 min-h-52 min-w-64 overflow-hidden rounded-lg border border-border/30 bg-muted/30">
+                <Tldraw
+                  cameraOptions={{
+                    constraints: {
+                      initialZoom: "fit-min",
+                      bounds: {
+                        x: 0,
+                        y: 0,
+                        w: 9000,
+                        h: 9000,
+                      },
+                      baseZoom: "fit-min",
+                      behavior: "fixed",
+                      origin: {
+                        x: 0,
+                        y: 0,
+                      },
+                      padding: {
+                        x: 0.1,
+                        y: 0.1,
+                      },
+                    },
+                  }}
+                  className="min-h-52"
+                  hideUi
+                  snapshot={JSON.parse(space.snapshotText).document}
+                />
               </div>
             </CardContent>
 
