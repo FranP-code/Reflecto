@@ -265,16 +265,6 @@ const FEATURES: Feature[] = [
 function HomeComponent() {
   return (
     <div className="relative">
-      {/* Background aesthetics */}
-      <div className="-z-10 pointer-events-none absolute inset-0 overflow-hidden">
-        {/* aurora blobs */}
-        <div className="-top-24 -translate-x-1/2 absolute left-1/3 h-[45rem] w-[45rem] animate-blob rounded-full bg-gradient-to-tr from-indigo-500/20 via-purple-500/10 to-cyan-500/20 blur-3xl" />
-        <div className="animation-delay-2000 -bottom-40 absolute right-[-8rem] h-96 w-96 animate-blob rounded-full bg-gradient-to-br from-fuchsia-500/10 to-sky-500/10 blur-3xl" />
-        <div className="animation-delay-4000 absolute top-1/3 left-[-6rem] h-80 w-80 animate-blob rounded-full bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 blur-3xl" />
-        {/* dotted grid overlay */}
-        <div className="absolute inset-0 bg-[length:24px_24px] bg-[linear-gradient(to_right,transparent_0,transparent_95%,oklch(1_0_0_/_0.05)_95%),linear-gradient(to_bottom,transparent_0,transparent_95%,oklch(1_0_0_/_0.05)_95%)]" />
-      </div>
-
       {/* Hero */}
       <section className="container mx-auto max-w-7xl px-4 pt-14 pb-24 sm:pt-20 sm:pb-32">
         <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
