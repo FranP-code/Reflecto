@@ -16,7 +16,7 @@ export type SpaceSnapshotRow = {
   $tableId: string;
   spaceId: string;
   userId: string;
-  snapshot: string; // JSON string containing { schema, document }
+  snapshot: string; // JSON string containing { document, session }
   $createdAt?: string;
   $updatedAt?: string;
 };
@@ -92,6 +92,11 @@ export async function upsertSpaceSnapshot(
   const existing = res.documents?.[0] as unknown as
     | SpaceSnapshotRow
     | undefined;
+
+  console.log("Upserting snapshot for space", spaceId, "user", uid, {
+    existing,
+    payload,
+  });
 
   const data = {
     spaceId,

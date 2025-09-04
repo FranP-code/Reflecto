@@ -102,7 +102,7 @@ function SpaceRoute() {
                   }
                   await upsertSpaceSnapshot(
                     id,
-                    { document: payload.document },
+                    { document: payload.document, session: payload.session },
                     session.$id
                   );
                   lastSavedRef.current = hash;
