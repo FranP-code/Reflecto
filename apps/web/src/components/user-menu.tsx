@@ -5,9 +5,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/base-dropdown-menu";
+} from "@/components/ui/radix-dropdown-menu";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "./ui/button";
 import { Skeleton } from "./ui/skeleton";
@@ -34,16 +33,8 @@ export default function UserMenu() {
       <DropdownMenuTrigger>
         <Button variant="outline">{session.name ?? session.email}</Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-card">
+      <DropdownMenuContent align="end" className="bg-card" sideOffset={16}>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>{session.email}</DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link to="/verify-email">Verify Email</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link to="/password">Password</Link>
-        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={async () => {
             await authClient.signOut();
