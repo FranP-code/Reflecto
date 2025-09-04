@@ -46,6 +46,12 @@ function RootComponent() {
     select: (s) => s.isLoading,
   });
 
+  const currentPath = useRouterState({
+    select: (s) => s.location.pathname,
+  });
+
+  const isSpaceRoute = currentPath === "/space";
+
   return (
     <>
       <HeadContent />
@@ -58,8 +64,10 @@ function RootComponent() {
         forcedTheme="dark"
         storageKey="vite-ui-theme"
       >
-        <div className="grid min-h-svh grid-rows-[auto_1fr_auto]">
-          <Header />
+        <div
+          className={`grid min-h-svh ${isSpaceRoute ? "grid-rows-[1fr_auto]" : "grid-rows-[auto_1fr_auto]"}`}
+        >
+          {!isSpaceRoute && <Header />}
           {isFetching ? <Loader /> : <Outlet />}
           <Footer />
         </div>
