@@ -53,6 +53,9 @@ function RootComponent() {
         attribute="class"
         defaultTheme="dark"
         disableTransitionOnChange
+        enableColorScheme={true}
+        enableSystem={false}
+        forcedTheme="dark"
         storageKey="vite-ui-theme"
       >
         <div className="grid min-h-svh grid-rows-[auto_1fr_auto]">
