@@ -17,6 +17,9 @@ export type SpaceSnapshotRow = {
   spaceId: string;
   userId: string;
   snapshot: string; // JSON string containing { schema, document }
+  // Optional metadata (create attributes in Appwrite collection)
+  title?: string;
+  color?: string; // hex color like #7c3aed
   $createdAt?: string;
   $updatedAt?: string;
 };
@@ -121,6 +124,48 @@ export async function upsertSpaceSnapshot(
       permissions
     );
   }
+}
+
+/**
+ * Create a new space with optional initial snapshot and metadata (title, color).
+ * Returns the new spaceId.
+ */
+export async function createSpace(args: {
+  title: string;
+  color: string; // hex
+  snapshot?: RemoteSnapshot;
+  userId: string;
+}): Promise<string> {
+  ensureEnv();
+  const uid = args.userId ?? (await getCurrentUserId());
+  if (!uid) {
+    throw new Error("Not authenticated");
+  }
+
+  const data: Record<string, unknown> = {
+    spaceId: crypto.randomUUID(),
+    userId: uid,
+    snapshot: args.snapshot ? JSON.stringify(args.snapshot) : undefined,
+    title: args.title,
+    color: args.color,
+  };
+
+  // Limit access to the owner by default
+  const permissions = [
+    Permission.read(Role.user(uid)),
+    Permission.update(Role.user(uid)),
+    Permission.delete(Role.user(uid)),
+  ];
+
+  const doc = await databases.createDocument(
+    DATABASE_ID,
+    COLLECTION_ID,
+    ID.unique(),
+    data,
+    permissions
+  );
+
+  return (doc as Models.Document).spaceId as string;
 }
 
 /**

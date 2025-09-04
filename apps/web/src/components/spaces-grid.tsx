@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { MoreHorizontal, Plus, Search } from "lucide-react";
 import { Tldraw } from "tldraw";
+import { NewSpaceDialog } from "@/components/new-space-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +33,7 @@ export function SpacesGrid() {
         return [] as SpaceCard[];
       }
       const rows = await listUserSpaceSnapshots(session.$id);
-      return rows.map(({ row, snapshot }, idx) => {
+      return rows.map(({ row, snapshot }) => {
         const snapshotText = snapshot
           ? JSON.stringify(snapshot)
           : (row.snapshot ?? "");
@@ -50,24 +51,16 @@ export function SpacesGrid() {
             return 0;
           }
         })();
-        const COLORS = [
-          "bg-blue-500",
-          "bg-green-500",
-          "bg-purple-500",
-          "bg-orange-500",
-          "bg-pink-500",
-          "bg-cyan-500",
-        ] as const;
         return {
           id: row.spaceId,
-          name: row.spaceId,
+          name: row.title || row.spaceId,
           lastEdited: row.$updatedAt
             ? new Date(row.$updatedAt).toLocaleString()
             : "",
           snapshotText,
           itemCount,
-          // keep some color variety
-          color: COLORS[idx % COLORS.length],
+          // Use actual color from DB or fallback to color variety
+          color: row.color || "#3b82f6", // Default to blue if no color
         } satisfies SpaceCard;
       });
     },
@@ -78,6 +71,11 @@ export function SpacesGrid() {
 
   return (
     <div className="space-y-6 p-6">
+      <style>
+        {`.tl-watermark_SEE-LICENSE {
+          z-index: 1 !important;
+        }`}
+      </style>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -86,10 +84,7 @@ export function SpacesGrid() {
             Organize your thoughts and ideas in visual workspaces
           </p>
         </div>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          New Space
-        </Button>
+        <NewSpaceDialog onSpaceCreated={() => spacesQuery.refetch()} />
       </div>
 
       {/* Search and Filters */}
@@ -116,7 +111,10 @@ export function SpacesGrid() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className={`h-3 w-3 rounded-full ${space.color}`} />
+                  <div
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: space.color }}
+                  />
                   <h3 className="font-semibold text-foreground transition-colors group-hover:text-primary">
                     {space.name}
                   </h3>
@@ -160,7 +158,11 @@ export function SpacesGrid() {
                   onMount={(editor) => {
                     editor.updateInstanceState({ isReadonly: true });
                   }}
-                  snapshot={JSON.parse(space.snapshotText).document}
+                  snapshot={
+                    space.snapshotText
+                      ? JSON.parse(space.snapshotText).document
+                      : undefined
+                  }
                 />
               </div>
             </CardContent>
@@ -186,10 +188,15 @@ export function SpacesGrid() {
             Create your first space to start organizing your thoughts and ideas
             visually.
           </p>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Your First Space
-          </Button>
+          <NewSpaceDialog
+            onSpaceCreated={() => spacesQuery.refetch()}
+            triggerButton={
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Your First Space
+              </Button>
+            }
+          />
         </div>
       )}
     </div>

@@ -122,6 +122,10 @@ body {
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+button {
+  @apply transition-colors disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
