@@ -215,7 +215,14 @@ export function SpacesGrid() {
               </CardContent>
 
               <CardFooter className="flex items-center justify-between pt-0 text-muted-foreground text-sm">
-                <span>{snapshot?.itemCount} items</span>
+                <span>
+                  {
+                    Object.keys(snapshot?.store || {}).filter((key) =>
+                      key.startsWith("shape:")
+                    ).length
+                  }{" "}
+                  items
+                </span>
                 <span>Edited {space.lastEdited}</span>
               </CardFooter>
             </Card>
