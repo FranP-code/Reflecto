@@ -368,8 +368,14 @@ function HomeComponent() {
 
         {/* Call to action */}
         <section className="container mx-auto max-w-6xl px-4 pt-6 pb-24">
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-8 sm:p-10">
-            <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.08] p-8 sm:p-10">
+            {/* Decorative gradient blobs behind content to increase contrast */}
+            <div className="-left-8 -top-8 pointer-events-none absolute h-56 w-56 rounded-full bg-gradient-to-br from-purple-500/30 to-fuchsia-500/20 opacity-60 blur-3xl" />
+            <div className="-right-12 -bottom-8 pointer-events-none absolute h-72 w-72 rounded-full bg-gradient-to-br from-cyan-400/25 to-emerald-400/15 opacity-50 blur-3xl" />
+            {/* subtle grid overlay similar to preview */}
+            <div className="pointer-events-none absolute inset-0 bg-grid opacity-20 mix-blend-overlay" />
+
+            <div className="relative z-10 flex flex-col items-center justify-between gap-6 sm:flex-row">
               <div>
                 <h3 className="text-balance font-semibold text-2xl sm:text-3xl">
                   Build your second brain
