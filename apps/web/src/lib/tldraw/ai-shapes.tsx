@@ -7,7 +7,7 @@ import {
   ShapeUtil,
   T,
 } from "tldraw";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { stopEventPropagation } from "tldraw";
 
 // Types
@@ -355,12 +355,12 @@ export class AITextResultShapeUtil extends ShapeUtil<AITextResultShape> {
     const contentRef = useRef<HTMLDivElement | null>(null);
     const rootRef = useRef<HTMLDivElement | null>(null);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (isEditing && textareaRef.current) textareaRef.current.focus();
     }, [isEditing]);
 
     // Ensure textarea grows with content while editing
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (!isEditing) return;
       const ta = textareaRef.current;
       if (!ta) return;
@@ -372,7 +372,8 @@ export class AITextResultShapeUtil extends ShapeUtil<AITextResultShape> {
     // Auto-size to content: measure and adjust height once per content/editing change
     const autosizeAppliedRef = useRef<{ content: string; editing: boolean } | null>(null);
     const autosizePassRef = useRef(0);
-    useEffect(() => {
+    const roRef = useRef<ResizeObserver | null>(null);
+    useLayoutEffect(() => {
       const prev = autosizeAppliedRef.current;
       if (prev && prev.content === shape.props.content && prev.editing === isEditing) return;
 
@@ -436,9 +437,67 @@ export class AITextResultShapeUtil extends ShapeUtil<AITextResultShape> {
           autosizeAppliedRef.current = { content: shape.props.content, editing: isEditing };
           autosizePassRef.current = 0;
         }
+
+        // Safety: for very fresh shapes, fonts/layout may settle a bit later.
+        // If the shape was created recently, schedule a delayed re-measure.
+        const now = Date.now();
+        const created = (shape.props as any)?.createdDate ?? now;
+        if (now - created < 1500) {
+          setTimeout(() => {
+            measureAndUpdate();
+          }, 120);
+          setTimeout(() => {
+            measureAndUpdate();
+          }, 300);
+        }
       });
       return () => {
         cancelAnimationFrame(raf1);
+      };
+    }, [isEditing, shape.id, shape.props.content]);
+
+    // Observe late layout changes and re-measure once if needed (e.g., fonts settling)
+    useLayoutEffect(() => {
+      const rootEl = rootRef.current;
+      if (!rootEl) return;
+      // Clean up any previous observer
+      roRef.current?.disconnect();
+      let fired = 0;
+      const ro = new ResizeObserver(() => {
+        if (fired > 1) return; // at most two extra passes
+        fired += 1;
+        requestAnimationFrame(() => {
+          // trigger a measure without changing the content/editing token
+          const minH = 100;
+          if (isEditing && textareaRef.current && headerRef.current) {
+            const ta = textareaRef.current as HTMLTextAreaElement;
+            const headerH = Math.ceil(headerRef.current.getBoundingClientRect().height);
+            const prevTaHeight = ta.style.height;
+            ta.style.height = 'auto';
+            const taH = Math.ceil(ta.scrollHeight);
+            ta.style.height = prevTaHeight || `${taH}px`;
+            const padding = 24, marginBetween = 8, headerDivider = 1, borderY = 4;
+            const desiredH = Math.max(minH, headerH + marginBetween + taH + padding + headerDivider + borderY);
+            const dh = Math.abs(desiredH - shape.props.h);
+            if (dh > 2) this.editor.updateShape({ id: shape.id, type: 'ai-text-result', props: { h: desiredH } });
+          } else {
+            const prevWidth = rootEl.style.width;
+            const prevHeight = rootEl.style.height;
+            rootEl.style.width = `${Math.max(120, Math.floor(shape.props.w))}px`;
+            rootEl.style.height = 'auto';
+            const cardH = Math.ceil(rootEl.scrollHeight);
+            rootEl.style.width = prevWidth;
+            rootEl.style.height = prevHeight;
+            const finalH = Math.max(minH, cardH);
+            const dh = Math.abs(finalH - shape.props.h);
+            if (dh > 2) this.editor.updateShape({ id: shape.id, type: 'ai-text-result', props: { h: finalH } });
+          }
+        });
+      });
+      ro.observe(rootEl);
+      roRef.current = ro;
+      return () => {
+        ro.disconnect();
       };
     }, [isEditing, shape.id, shape.props.content]);
 
@@ -458,6 +517,7 @@ export class AITextResultShapeUtil extends ShapeUtil<AITextResultShape> {
         <div
           ref={rootRef}
           style={{
+            boxSizing: "border-box",
             width: "100%",
             height: "100%",
             border: "2px solid #28a745",
@@ -502,6 +562,7 @@ export class AITextResultShapeUtil extends ShapeUtil<AITextResultShape> {
               }}
               aria-label="Edit extracted text"
               style={{
+                boxSizing: "border-box",
                 flex: "0 0 auto",
                 minHeight: 0,
                 height: "auto",
@@ -513,7 +574,9 @@ export class AITextResultShapeUtil extends ShapeUtil<AITextResultShape> {
                 lineHeight: 1.4,
                 color: "#212529",
                 outline: "none",
-                overflow: "hidden"
+                overflow: "hidden",
+                overflowWrap: "anywhere",
+                wordBreak: "break-word",
               }}
               placeholder="Edit extracted content..."
             />
@@ -521,13 +584,16 @@ export class AITextResultShapeUtil extends ShapeUtil<AITextResultShape> {
             <div
               ref={contentRef}
               style={{
+                boxSizing: "border-box",
                 flex: "0 0 auto",
                 minHeight: 0,
                 lineHeight: 1.4,
                 color: "#495057",
                 whiteSpace: "pre-wrap",
                 cursor: "text",
-                overflow: "hidden"
+                overflow: "hidden",
+                overflowWrap: "anywhere",
+                wordBreak: "break-word",
               }}
             >
               {shape.props.content || "No content extracted"}
@@ -556,8 +622,48 @@ export function createAITextResult(
   const id = createShapeId();
   const baseW = 280;
   const baseH = 100;
-  const dynW = baseW;
-  const dynH = baseH;
+  // Width estimate from longest line length (rough char width ~7px at 12px font)
+  const lines = (opts.content || "").split(/\r?\n/);
+  const longest = lines.reduce((m, l) => Math.max(m, l.length), 0);
+  const approxInner = Math.max(baseW - 24 - 4, Math.min(520, Math.floor(longest * 7)));
+  const dynW = Math.max(240, Math.min(640, approxInner + 24 + 4));
+  // Rough estimate: assume ~42 chars per line at this width & font, 18px line-height
+  const charsPerLine = 42;
+  const estLines = Math.max(2, Math.ceil((opts.content?.length ?? 0) / charsPerLine));
+  const headerAndChrome = 60; // header + divider + margins
+  const padding = 24; // vertical padding
+  const estH = headerAndChrome + estLines * 18 + padding;
+  // Precise pre-measure using offscreen DOM (when available)
+  let dynH = Math.max(baseH, Math.min(480, estH));
+  try {
+    const innerW = Math.max(120, Math.floor(dynW - 24 - 4));
+    const clone = document.createElement("div");
+    clone.style.position = "absolute";
+    clone.style.left = "-10000px";
+    clone.style.top = "-10000px";
+    clone.style.visibility = "hidden";
+    clone.style.pointerEvents = "none";
+    clone.style.whiteSpace = "pre-wrap";
+    clone.style.lineHeight = "1.4";
+    clone.style.fontSize = "12px"; // matches card body
+    clone.style.fontFamily = "inherit";
+    clone.style.width = `${innerW}px`;
+    clone.textContent = opts.content || "";
+    document.body.appendChild(clone);
+    const contentH = Math.ceil(clone.getBoundingClientRect().height);
+    clone.remove();
+    if (contentH) {
+      const borderY = 4; // 2px + 2px
+      const marginBetween = 8; // header bottom margin
+      const headerApprox = 28; // header line height approx
+      const divider = 1;
+      const chrome = headerApprox + divider + marginBetween;
+      const precise = chrome + padding + contentH + borderY;
+      dynH = Math.max(baseH, Math.min(640, precise));
+    }
+  } catch {
+    // ignore and use heuristic
+  }
   editor.createShape({
     id,
     type: "ai-text-result",

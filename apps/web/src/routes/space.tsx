@@ -29,7 +29,7 @@ import { KnowledgeGraphManager } from "@/lib/tldraw/knowledge-graph";
 import { Camera, Sparkles, Link2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { extractTextContentFromShape, generateRelationText, insertRelationBetweenShapes } from "@/lib/tldraw/relations";
+import { extractTextContentFromShape, generateRelationText, insertRelationBetweenShapes, normalizeShapeHeight } from "@/lib/tldraw/relations";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -209,6 +209,7 @@ function SpaceRoute() {
             x: cx,
             y: cy,
           });
+          normalizeShapeHeight(editor, textShapeId);
           // Analyze connections
           const kg = new KnowledgeGraphManager(editor);
           await kg.analyzeConnections(textShapeId);
@@ -361,4 +362,3 @@ function SpaceRoute() {
     </div>
   );
 }
-// Removed absolute-positioned overlay; actions are now inside the bottom toolbar via components.Toolbar

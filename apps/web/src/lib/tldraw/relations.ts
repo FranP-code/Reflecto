@@ -2,6 +2,49 @@ import { generateText } from "./processing";
 import { KnowledgeGraphManager } from "./knowledge-graph";
 import { createAITextResult } from "./ai-shapes";
 
+export function normalizeShapeHeight(editor: any, shapeId: string) {
+  try {
+    const measure = () => {
+      const el = document.getElementById(shapeId);
+      if (!el) return false;
+      const card = el.firstElementChild as HTMLElement | null;
+      if (!card) return false;
+      const width = Math.ceil(card.clientWidth);
+      if (!width) return false; // wait until it has layout width
+      const prevH = card.style.height;
+      card.style.height = "auto";
+      const measured = Math.ceil(card.scrollHeight);
+      card.style.height = prevH;
+      if (measured && Number.isFinite(measured)) {
+        const shape = editor.getShape(shapeId);
+        const minH = 100;
+        const finalH = Math.max(minH, measured);
+        if (Math.abs((shape?.props?.h ?? 0) - finalH) > 2) {
+          editor.updateShape({ id: shapeId, type: "ai-text-result", props: { h: finalH } });
+        }
+        return true;
+      }
+      return false;
+    };
+
+    // Try up to ~8 frames for a stable width & layout
+    let tries = 0;
+    const tick = () => {
+      if (measure()) return;
+      if (tries++ > 8) return;
+      requestAnimationFrame(() => setTimeout(tick, 0));
+    };
+    setTimeout(() => requestAnimationFrame(tick), 0);
+
+    // Extra late fallback in case fonts/style settle late
+    setTimeout(() => {
+      measure();
+    }, 50);
+  } catch {
+    // ignore measurement errors
+  }
+}
+
 export function extractTextContentFromShape(editor: any, shape: any): string {
   if (!shape) return "";
   if (shape.type === "ai-text-result") return shape.props?.content ?? "";
@@ -76,6 +119,9 @@ export async function insertRelationBetweenShapes(
       x: pos.x,
       y: pos.y,
     });
+
+    // Force a first-paint normalize for the relation card height
+    normalizeShapeHeight(editor, relationId);
 
     // Nudge relation to avoid overlap with A or B (up to 2 passes)
     for (let i = 0; i < 2; i++) {
