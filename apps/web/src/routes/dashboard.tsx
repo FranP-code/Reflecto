@@ -1,28 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { SpacesGrid } from "@/components/spaces-grid";
-import { authClient } from "@/lib/auth-client";
+import { authClient, account } from "@/lib/auth-client";
 import { trpc } from "@/utils/trpc";
 
 export const Route = createFileRoute("/dashboard")({
+  beforeLoad: async () => {
+    const me = await account.get();
+    if (!me) {
+      throw redirect({ to: "/" });
+    }
+    const isVerified = Boolean(me.emailVerification);
+    if (!isVerified) {
+      throw redirect({ to: "/verify-email" });
+    }
+  },
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const { data: session, isPending } = authClient.useSession();
 
-  const navigate = Route.useNavigate();
-
   const privateData = useQuery(trpc.privateData.queryOptions());
-
-  useEffect(() => {
-    if (!(session || isPending)) {
-      navigate({
-        to: "/login",
-      });
-    }
-  }, [session, isPending, navigate]);
 
   if (isPending) {
     return <div>Loading...</div>;
