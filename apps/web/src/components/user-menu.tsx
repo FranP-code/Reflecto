@@ -36,6 +36,13 @@ export default function UserMenu() {
       <DropdownMenuContent align="end" className="bg-card" sideOffset={16}>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuItem
+          onClick={() => {
+            navigate({ to: "/settings" });
+          }}
+        >
+          Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem
           onClick={async () => {
             await authClient.signOut();
             // Immediately reflect logout in UI

@@ -7,6 +7,7 @@ import { env } from "hono/adapter";
 import { cors } from "hono/cors";
 import { logger as honoLogger } from "hono/logger";
 import { createContext } from "./lib/context";
+import { sanitizeModel } from "./lib/ai-models";
 import { logger } from "./lib/logger";
 import { appRouter } from "./routers/index";
 
@@ -30,7 +31,7 @@ app.use(
   cors({
     origin: process.env.CORS_ORIGIN || "",
     allowMethods: ["GET", "POST", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization"],
+    allowHeaders: ["Content-Type", "Authorization", "x-ai-model"],
     credentials: true,
   })
 );
@@ -91,8 +92,9 @@ app.post("/ai/ocr", async (c) => {
   const base64 = arrayBufferToBase64(await blob.arrayBuffer());
   const dataUrl = `data:${contentType};base64,${base64}`;
 
+  const model = sanitizeModel(c.req.header("x-ai-model"));
   const body = {
-    model: "openrouter/sonoma-sky-alpha",
+    model,
     messages: [
       {
         role: "system",
@@ -161,8 +163,9 @@ app.post("/ai/generate", async (c) => {
     return c.json({ error: "Missing prompt" }, 400);
   }
 
+  const modelGen = sanitizeModel(c.req.header("x-ai-model"));
   const body = {
-    model: "openrouter/sonoma-sky-alpha",
+    model: modelGen,
     temperature,
     messages: [
       { role: "system", content: system },

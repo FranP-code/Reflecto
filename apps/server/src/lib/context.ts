@@ -1,5 +1,6 @@
 import type { Context as HonoContext } from "hono";
 import { Account, Client } from "node-appwrite";
+import { sanitizeModel } from "./ai-models";
 
 // Hoisted regex for performance and linting
 const BEARER_REGEX = /^Bearer\s+(.+)$/i;
@@ -16,12 +17,16 @@ export type CreateContextOptions = {
 };
 
 export async function createContext({ context }: CreateContextOptions) {
+  // Capture selected AI model from client header (optional)
+  const aiModelHeader = context.req.header("x-ai-model");
+  const aiModel = sanitizeModel(aiModelHeader);
+
   const endpoint = process.env.APPWRITE_ENDPOINT;
   const projectId = process.env.APPWRITE_PROJECT_ID;
 
   if (!(endpoint && projectId)) {
     // Appwrite not configured; treat as unauthenticated
-    return { user: null as AuthUser };
+    return { user: null as AuthUser, aiModel };
   }
 
   // Initialize client per request
@@ -68,9 +73,9 @@ export async function createContext({ context }: CreateContextOptions) {
       name: user.name ?? null,
       email: user.email ?? null,
     };
-    return { user: minimal };
+    return { user: minimal, aiModel };
   } catch {
-    return { user: null as AuthUser };
+    return { user: null as AuthUser, aiModel };
   }
 }
 

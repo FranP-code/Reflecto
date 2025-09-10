@@ -19,7 +19,7 @@ async function postBinary(url: string, file: File): Promise<{ text: string }> {
 async function postJson<TReq extends object, TRes>(url: string, body: TReq): Promise<TRes> {
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "x-ai-model": localStorage.getItem("aiModel") ?? "" },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`Request failed: ${res.status}`);

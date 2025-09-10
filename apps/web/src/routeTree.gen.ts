@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as SpaceRouteImport } from './routes/space'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PasswordRouteImport } from './routes/password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -24,6 +25,11 @@ const VerifyEmailRoute = VerifyEmailRouteImport.update({
 const SpaceRoute = SpaceRouteImport.update({
   id: '/space',
   path: '/space',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PasswordRoute = PasswordRouteImport.update({
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/password': typeof PasswordRoute
+  '/settings': typeof SettingsRoute
   '/space': typeof SpaceRoute
   '/verify-email': typeof VerifyEmailRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/password': typeof PasswordRoute
+  '/settings': typeof SettingsRoute
   '/space': typeof SpaceRoute
   '/verify-email': typeof VerifyEmailRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/password': typeof PasswordRoute
+  '/settings': typeof SettingsRoute
   '/space': typeof SpaceRoute
   '/verify-email': typeof VerifyEmailRoute
 }
@@ -79,16 +88,25 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/password'
+    | '/settings'
     | '/space'
     | '/verify-email'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login' | '/password' | '/space' | '/verify-email'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/password'
+    | '/settings'
+    | '/space'
+    | '/verify-email'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
     | '/login'
     | '/password'
+    | '/settings'
     | '/space'
     | '/verify-email'
   fileRoutesById: FileRoutesById
@@ -98,6 +116,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   PasswordRoute: typeof PasswordRoute
+  SettingsRoute: typeof SettingsRoute
   SpaceRoute: typeof SpaceRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
 }
@@ -116,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/space'
       fullPath: '/space'
       preLoaderRoute: typeof SpaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/password': {
@@ -154,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   PasswordRoute: PasswordRoute,
+  SettingsRoute: SettingsRoute,
   SpaceRoute: SpaceRoute,
   VerifyEmailRoute: VerifyEmailRoute,
 }
