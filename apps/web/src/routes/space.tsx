@@ -26,9 +26,12 @@ import { AIImageShapeUtil, AITextResultShapeUtil } from "@/lib/tldraw/ai-shapes"
 import { createImageShapeFromFile, setupFileDropHandler, generateText } from "@/lib/tldraw/processing";
 import { createAITextResult } from "@/lib/tldraw/ai-shapes";
 import { KnowledgeGraphManager } from "@/lib/tldraw/knowledge-graph";
-import { Camera, Sparkles } from "lucide-react";
+import { Camera, Sparkles, Link2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { extractTextContentFromShape, generateRelationText, insertRelationBetweenShapes } from "@/lib/tldraw/relations";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 export const Route = createFileRoute("/space")({
   validateSearch: z.object({
@@ -152,6 +155,35 @@ function SpaceRoute() {
         await createImageShapeFromFile(editor, file, { x: x + w / 2, y: y + h / 2 });
       };
 
+      const handleMagicArrow = async () => {
+        try {
+          const ids: string[] = editor.getSelectedShapeIds?.() ?? [];
+          if (ids.length !== 2) {
+            toast.error("Select exactly two text shapes to use Magic Arrow.");
+            return;
+          }
+          const [aId, bId] = ids;
+          const a = editor.getShape(aId as any);
+          const b = editor.getShape(bId as any);
+          const textA = extractTextContentFromShape(editor, a);
+          const textB = extractTextContentFromShape(editor, b);
+          if (!(textA && textB)) {
+            toast.error("Both selected shapes must contain text.");
+            return;
+          }
+          const toastId = toast.loading("Generating relation...");
+          const rel = await generateRelationText(textA, textB);
+          if (!rel) {
+            toast.error("Failed to generate relation.", { id: toastId });
+            return;
+          }
+          await insertRelationBetweenShapes(editor, aId, bId, rel);
+          toast.success("Relation added", { id: toastId });
+        } catch (e) {
+          toast.error("Magic Arrow failed. Try again.");
+        }
+      };
+
       const handleOpenPrompt = () => {
         setPromptText("");
         setGenError(null);
@@ -199,6 +231,15 @@ function SpaceRoute() {
                 </Button>
               </TooltipTrigger >
               <TooltipContent>Upload Image (OCR)</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger>
+                <Button type="button" onClick={handleMagicArrow}>
+                  <Link2 />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Magic Arrow (select two text shapes)</TooltipContent>
             </Tooltip>
 
             <Dialog open={promptOpen} onOpenChange={setPromptOpen}>
@@ -263,6 +304,7 @@ function SpaceRoute() {
 
   return (
     <div className="mx-4 mt-4" style={{ position: "relative", inset: 0 }}>
+      <Toaster />
       <Tldraw
         onMount={(editor) => {
           editor.user.updateUserPreferences({ colorScheme: "dark" });
