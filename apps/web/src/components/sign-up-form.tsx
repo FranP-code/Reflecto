@@ -55,7 +55,7 @@ export default function SignUpForm({
           .string()
           .min(
             MIN_PASSWORD_LENGTH,
-            `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
+            `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
           ),
       }),
     },
@@ -160,7 +160,7 @@ export default function SignUpForm({
 
       <div className="mt-4 space-y-2 text-center">
         <div className="flex items-center justify-between">
-          <Button asChild variant="link" className="px-0">
+          <Button asChild className="px-0" variant="link">
             <Link to="/verify-email">Verify your email</Link>
           </Button>
           <Button

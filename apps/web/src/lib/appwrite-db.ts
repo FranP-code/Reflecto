@@ -1,14 +1,16 @@
 import type { Models } from "appwrite";
-import { Databases, ID, Permission, Query, Role } from "appwrite";
+import { Databases, ID, Permission, Query, Role, Storage } from "appwrite";
 import type { TLEditorSnapshot } from "tldraw";
 import { account, appwriteClient } from "@/lib/auth-client";
 
 // Environment-configured IDs for Appwrite
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DB_ID as string;
 const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID as string;
+const BUCKET_ID = import.meta.env.VITE_APPWRITE_BUCKET_ID as string;
 
 // Initialize TablesDB once per app
 const databases = new Databases(appwriteClient);
+const storage = new Storage(appwriteClient);
 
 export type SpaceSnapshotRow = {
   $id: string;
@@ -30,6 +32,14 @@ function ensureEnv() {
   if (!(DATABASE_ID && COLLECTION_ID)) {
     throw new Error(
       "Missing Appwrite DB config. Please set VITE_APPWRITE_DB_ID and VITE_APPWRITE_COLLECTION_ID."
+    );
+  }
+}
+
+function ensureStorageEnv() {
+  if (!BUCKET_ID) {
+    throw new Error(
+      "Missing Appwrite Storage config. Please set VITE_APPWRITE_BUCKET_ID."
     );
   }
 }
@@ -266,4 +276,38 @@ export async function deleteSpace(args: {
   }
 
   await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, existing.$id);
+}
+
+/**
+ * Upload an image file to Appwrite Storage and return its identifiers.
+ * Applies user-level read/update/delete permissions so only the owner can access it by default.
+ */
+export async function uploadImageToStorage(file: File, userId?: string): Promise<{
+  fileId: string;
+  fileUrl: string;
+}> {
+  ensureStorageEnv();
+  const uid = userId ?? (await getCurrentUserId());
+  if (!uid) {
+    throw new Error("Not authenticated");
+  }
+
+  const permissions = [
+    Permission.read(Role.user(uid)),
+    Permission.update(Role.user(uid)),
+    Permission.delete(Role.user(uid)),
+  ];
+
+  const created = await storage.createFile(
+    BUCKET_ID,
+    ID.unique(),
+    file,
+    permissions
+  );
+
+  // Generate a view URL (works in browser with Appwrite session)
+  const fileId = (created as Models.File).$id;
+  const fileUrl = storage.getFileView(BUCKET_ID, fileId).toString();
+
+  return { fileId, fileUrl };
 }

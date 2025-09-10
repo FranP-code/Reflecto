@@ -53,7 +53,7 @@ export default function SignInForm({
           .string()
           .min(
             MIN_PASSWORD_LENGTH,
-            `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
+            `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
           ),
       }),
     },
@@ -136,12 +136,12 @@ export default function SignInForm({
 
       <div className="mt-4 space-y-2 text-center">
         <div className="flex items-center justify-between">
-          <Button asChild variant="link" className="px-0">
-            <Link to="/password" search={{ mode: "recover" }}>
+          <Button asChild className="px-0" variant="link">
+            <Link search={{ mode: "recover" }} to="/password">
               Forgot password?
             </Link>
           </Button>
-          <Button asChild variant="link" className="px-0">
+          <Button asChild className="px-0" variant="link">
             <Link to="/verify-email">Verify your email</Link>
           </Button>
         </div>

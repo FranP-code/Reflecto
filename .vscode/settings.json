@@ -32,5 +32,11 @@
     "source.fixAll.biome": "explicit",
     "source.organizeImports.biome": "explicit"
   },
-  "cSpell.words": ["appwrite", "Reflecto", "Tldraw"]
+  "cSpell.words": [
+    "appwrite",
+    "OPENROUTER",
+    "Reflecto",
+    "sonoma",
+    "Tldraw"
+  ]
 }
