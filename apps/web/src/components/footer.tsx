@@ -19,7 +19,7 @@ export default function Footer() {
               <span className="font-medium">Reflecto</span>
               <span className="hidden sm:inline">•</span>
               <span className="hidden text-muted-foreground sm:inline">
-                Private by default
+                Open Source
               </span>
             </div>
 

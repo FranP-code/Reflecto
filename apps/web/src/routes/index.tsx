@@ -321,7 +321,7 @@ function HomeComponent() {
             <div className="mt-8 flex items-center gap-3 text-muted-foreground text-xs">
               <img src="/icon.svg" alt="Icon" />
 
-              <span>Private by default • Powered by lightweight AI</span>
+              <span>Open Source • Powered by lightweight AI</span>
             </div>
           </div>
           {/* Showcase preview */}
@@ -336,7 +336,7 @@ function HomeComponent() {
           <div className="mx-auto grid max-w-4xl grid-cols-2 gap-4 pb-8 text-center sm:grid-cols-4">
             {[
               { n: "2x", l: "Faster capture" },
-              { n: "100%", l: "Private by default" },
+              { n: "100%", l: "Open Source" },
               { n: "< 1s", l: "Search latency" },
               { n: "∞", l: "Ideas connected" },
             ].map((s) => (
