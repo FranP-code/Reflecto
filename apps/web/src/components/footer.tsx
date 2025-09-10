@@ -15,10 +15,7 @@ export default function Footer() {
                 "text-muted-foreground",
               ].join(" ")}
             >
-              <span
-                aria-hidden
-                className="inline-block h-4 w-4 rounded bg-gradient-to-br from-purple-500 to-fuchsia-500"
-              />
+              <img src="/icon.svg" alt="Icon" />
               <span className="font-medium">Reflecto</span>
               <span className="hidden sm:inline">•</span>
               <span className="hidden text-muted-foreground sm:inline">

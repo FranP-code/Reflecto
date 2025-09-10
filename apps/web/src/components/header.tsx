@@ -18,10 +18,7 @@ export default function Header() {
             {/* Logo + primary nav */}
             <div className="flex items-center gap-4">
               <Link className="inline-flex items-center gap-2" to="/">
-                <span
-                  aria-hidden
-                  className="inline-block h-6 w-6 rounded bg-gradient-to-br from-purple-500 to-fuchsia-500"
-                />
+                <img src="/icon.svg" alt="Icon" />
                 <span className="font-semibold tracking-tight">Reflecto</span>
               </Link>
 

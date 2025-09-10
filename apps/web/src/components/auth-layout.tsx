@@ -26,10 +26,7 @@ export default function AuthLayout({
         <aside className="relative hidden flex-col justify-between lg:flex">
           <div>
             <Link className="inline-flex items-center gap-2" to="/">
-              <span
-                aria-hidden
-                className="inline-block h-7 w-7 rounded bg-gradient-to-br from-purple-500 to-fuchsia-500 shadow-md shadow-fuchsia-500/20"
-              />
+              <img src="/icon.svg" alt="Icon" />
               <span className="text-lg font-semibold tracking-tight">Reflecto</span>
             </Link>
 
