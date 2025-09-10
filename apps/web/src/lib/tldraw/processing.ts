@@ -16,6 +16,60 @@ async function postBinary(url: string, file: File): Promise<{ text: string }> {
   return res.json() as Promise<{ text: string }>;
 }
 
+async function postJson<TReq extends object, TRes>(url: string, body: TReq): Promise<TRes> {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+  return res.json() as Promise<TRes>;
+}
+
+export async function generateText(prompt: string, temperature: number = 0.7): Promise<string> {
+  const { text } = await postJson<{ prompt: string; temperature: number }, { text: string }>(
+    `${API_BASE}/ai/generate`,
+    { prompt, temperature }
+  );
+  return text;
+}
+
+export async function processPromptGeneration(
+  editor: any,
+  promptShapeId: string
+): Promise<void> {
+  const shape = editor.getShape(promptShapeId);
+  if (!shape || shape.type !== "ai-prompt") return;
+  const prompt: string = shape.props.prompt ?? "";
+  const temperature: number = Number(shape.props.temperature ?? 0.7) || 0.7;
+  editor.updateShape({ id: promptShapeId, type: "ai-prompt", props: { status: "processing" } });
+  try {
+    const { text } = await postJson<{ prompt: string; temperature: number }, { text: string }>(
+      `${API_BASE}/ai/generate`,
+      { prompt, temperature }
+    );
+
+    const pShape = editor.getShape(promptShapeId);
+    const pW = Math.max(1, pShape?.props?.w ?? 320);
+    const gap = Math.min(80, Math.max(24, Math.floor(pW * 0.12)));
+    const textShapeId = createAITextResult(editor, {
+      fromShapeId: promptShapeId,
+      sourceType: "prompt",
+      content: text,
+      x: pShape.x + pW + gap,
+      y: pShape.y,
+    });
+
+    const kgManager = new KnowledgeGraphManager(editor);
+    kgManager.createConnection(promptShapeId, textShapeId, "generates");
+    await kgManager.analyzeConnections(textShapeId);
+
+    editor.updateShape({ id: promptShapeId, type: "ai-prompt", props: { status: "completed" } });
+  } catch (e) {
+    editor.updateShape({ id: promptShapeId, type: "ai-prompt", props: { status: "error" } });
+  }
+}
+
 export async function processImageWithOCR(
   editor: any,
   shapeId: string,
@@ -138,4 +192,36 @@ export async function createImageShapeFromFile(
     },
   });
   await processImageWithOCR(editor, shapeId, file);
+}
+
+export async function createPromptShape(
+  editor: any,
+  position: { x: number; y: number }
+) {
+  const shapeId = createShapeId();
+  editor.createShape({
+    id: shapeId,
+    type: "ai-prompt",
+    x: position.x,
+    y: position.y,
+    props: {
+      prompt: "",
+      status: "idle",
+      createdDate: Date.now(),
+      w: 320,
+      h: 180,
+      temperature: 0.7,
+    },
+  });
+  return shapeId;
+}
+
+export function registerPromptGenerator(editor: any) {
+  (window as any).__aiGenerate = async (shapeId: string) => {
+    try {
+      await processPromptGeneration(editor, shapeId);
+    } catch {
+      // status updates happen inside
+    }
+  };
 }

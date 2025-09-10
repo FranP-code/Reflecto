@@ -128,6 +128,64 @@ app.post("/ai/ocr", async (c) => {
   return c.json({ text });
 });
 
+// Text generation via OpenRouter (same model as OCR, text-only)
+app.post("/ai/generate", async (c) => {
+  const { OPENROUTER_API_KEY, OPENROUTER_SITE_URL, OPENROUTER_SITE_NAME } =
+    env<{
+      OPENROUTER_API_KEY?: string;
+      OPENROUTER_SITE_URL?: string;
+      OPENROUTER_SITE_NAME?: string;
+    }>(c);
+  if (!OPENROUTER_API_KEY) {
+    return c.json({ error: "Missing OPENROUTER_API_KEY" }, 500);
+  }
+
+  type Req = { prompt?: string; system?: string; temperature?: number };
+  let bodyJson: Req | null = null;
+  try {
+    bodyJson = await c.req.json<Req>();
+  } catch {
+    // ignore and treat as empty
+  }
+  const prompt = bodyJson?.prompt ?? "";
+  const baseSystem =
+    "You are a concise assistant. Respond with a brief, plain text answer. Do not use markdown, lists, headings, or code fences. Keep it under ~150 words and avoid extra commentary.";
+  const system = bodyJson?.system
+    ? `${bodyJson.system}\n\nRules: Respond concisely in plain text only. No markdown, lists, headings, or code fences. Keep it under ~150 words.`
+    : baseSystem;
+  const temperature = Number.isFinite(bodyJson?.temperature)
+    ? (bodyJson?.temperature as number)
+    : 0.7;
+
+  if (!prompt.trim()) {
+    return c.json({ error: "Missing prompt" }, 400);
+  }
+
+  const body = {
+    model: "openrouter/sonoma-sky-alpha",
+    temperature,
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: prompt },
+    ],
+  };
+
+  const res = await openRouterChat(OPENROUTER_API_KEY as string, body, {
+    referer: OPENROUTER_SITE_URL,
+    title: OPENROUTER_SITE_NAME,
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    return c.json(
+      { error: `OpenRouter error ${res.status}`, details: err },
+      502
+    );
+  }
+  const json = (await res.json()) as any;
+  const text: string = json?.choices?.[0]?.message?.content ?? "";
+  return c.json({ text });
+});
+
 app.get("/", (c) => {
   return c.text("OK");
 });

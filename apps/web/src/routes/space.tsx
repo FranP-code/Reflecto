@@ -23,8 +23,11 @@ import {
 } from "@/lib/appwrite-db";
 import { authClient } from "@/lib/auth-client";
 import { AIImageShapeUtil, AITextResultShapeUtil } from "@/lib/tldraw/ai-shapes";
-import { createImageShapeFromFile, setupFileDropHandler } from "@/lib/tldraw/processing";
-import { Camera } from "lucide-react";
+import { createImageShapeFromFile, setupFileDropHandler, generateText } from "@/lib/tldraw/processing";
+import { createAITextResult } from "@/lib/tldraw/ai-shapes";
+import { KnowledgeGraphManager } from "@/lib/tldraw/knowledge-graph";
+import { Camera, Sparkles } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const Route = createFileRoute("/space")({
@@ -103,6 +106,11 @@ function SpaceRoute() {
   const components: TLComponents = {
     Toolbar: (props) => {
       const editor = useEditor();
+      const [promptOpen, setPromptOpen] = useState(false);
+      const [promptText, setPromptText] = useState("");
+      const [temperature, setTemperature] = useState(0.7);
+      const [isGenLoading, setIsGenLoading] = useState(false);
+      const [genError, setGenError] = useState<string | null>(null);
 
       async function pickImageFile(): Promise<File | null> {
         try {
@@ -144,6 +152,42 @@ function SpaceRoute() {
         await createImageShapeFromFile(editor, file, { x: x + w / 2, y: y + h / 2 });
       };
 
+      const handleOpenPrompt = () => {
+        setPromptText("");
+        setGenError(null);
+        setTemperature(0.7);
+        setPromptOpen(true);
+      };
+
+      const handleGenerateFromDialog = async () => {
+        if (!promptText.trim()) return;
+        setIsGenLoading(true);
+        setGenError(null);
+        try {
+          let text = await generateText(promptText, temperature);
+          text = text.trim();
+          // Center position
+          const { x, y, w, h } = editor.getViewportPageBounds();
+          const cx = x + w / 2;
+          const cy = y + h / 2;
+          const textShapeId = createAITextResult(editor, {
+            fromShapeId: null,
+            sourceType: "prompt",
+            content: text,
+            x: cx,
+            y: cy,
+          });
+          // Analyze connections
+          const kg = new KnowledgeGraphManager(editor);
+          await kg.analyzeConnections(textShapeId);
+          setPromptOpen(false);
+        } catch (e: any) {
+          setGenError(e?.message ?? "Failed to generate text");
+        } finally {
+          setIsGenLoading(false);
+        }
+      };
+
       return (
         <DefaultToolbar {...props}>
           {/* Custom actions group at the start (left) of the toolbar */}
@@ -151,14 +195,63 @@ function SpaceRoute() {
             <Tooltip>
               <TooltipTrigger>
                 <Button type="button" onClick={handlePickImage}>
-                  {/* Upload Image (OCR) */}
                   <Camera />
                 </Button>
               </TooltipTrigger >
-              <TooltipContent >
-                Upload Image (OCR)
-              </TooltipContent >
+              <TooltipContent>Upload Image (OCR)</TooltipContent>
             </Tooltip>
+
+            <Dialog open={promptOpen} onOpenChange={setPromptOpen}>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button type="button" onClick={handleOpenPrompt}>
+                    <Sparkles />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Generate Text</TooltipContent>
+              </Tooltip>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Generate Text</DialogTitle>
+                  <DialogDescription>Enter a prompt to generate AI text. The result will be inserted on the canvas.</DialogDescription>
+                </DialogHeader>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <textarea
+                    value={promptText}
+                    onChange={(e) => setPromptText(e.target.value)}
+                    placeholder="Write your prompt..."
+                    style={{
+                      minHeight: 120,
+                      resize: "vertical",
+                      width: "100%",
+                      border: "1px solid #ced4da",
+                      borderRadius: 6,
+                      padding: 8,
+                      lineHeight: 1.4,
+                      outline: "none",
+                    }}
+                  />
+                  <label style={{ fontSize: 12, }}>Temperature: {temperature.toFixed(2)}</label>
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={temperature}
+                    onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                  />
+                  {genError ? (
+                    <div style={{ color: "#a4000f", fontSize: 12 }}>{genError}</div>
+                  ) : null}
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="secondary" onClick={() => setPromptOpen(false)} disabled={isGenLoading}>Cancel</Button>
+                  <Button type="button" onClick={handleGenerateFromDialog} disabled={isGenLoading || !promptText.trim()}>
+                    {isGenLoading ? "Generating..." : "Generate"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
           {/* Separator */}
           <div style={{ borderRight: "1px solid #888", height: "30px", margin: "0 8px" }} />
@@ -175,6 +268,7 @@ function SpaceRoute() {
           editor.user.updateUserPreferences({ colorScheme: "dark" });
           // Expose editor for helper UI
           (window as any).editor = editor;
+          // Prompt generator handled via toolbar dialog
 
           // Debounced save on document changes (user-originated)
           const debounceMs = 1200;
