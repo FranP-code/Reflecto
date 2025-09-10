@@ -64,95 +64,71 @@ export default function SignInForm({
   }
 
   return (
-    <div className="mx-auto mt-10 w-full max-w-md p-6">
-      <h1 className="mb-6 text-center font-bold text-3xl">Welcome Back</h1>
-
-      <form
-        className="space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          form.handleSubmit();
-        }}
-      >
-        <div>
-          <form.Field name="email">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>Email</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  type="email"
-                  value={field.state.value}
-                />
-                {field.state.meta.errors.map((error) => (
-                  <p className="text-red-500" key={error?.message}>
-                    {error?.message}
-                  </p>
-                ))}
-              </div>
-            )}
-          </form.Field>
-        </div>
-
-        <div>
-          <form.Field name="password">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>Password</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  type="password"
-                  value={field.state.value}
-                />
-                {field.state.meta.errors.map((error) => (
-                  <p className="text-red-500" key={error?.message}>
-                    {error?.message}
-                  </p>
-                ))}
-              </div>
-            )}
-          </form.Field>
-        </div>
-
-        <form.Subscribe>
-          {(state) => (
-            <Button
-              className="w-full"
-              disabled={!state.canSubmit || state.isSubmitting}
-              type="submit"
-            >
-              {state.isSubmitting ? "Submitting..." : "Sign In"}
-            </Button>
+    <form
+      className="space-y-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        form.handleSubmit();
+      }}
+    >
+      <div>
+        <form.Field name="email">
+          {(field) => (
+            <div className="space-y-2">
+              <Label htmlFor={field.name}>Email</Label>
+              <Input
+                id={field.name}
+                name={field.name}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                type="email"
+                value={field.state.value}
+              />
+              {field.state.meta.errors.map((error) => (
+                <p className="text-red-500" key={error?.message}>
+                  {error?.message}
+                </p>
+              ))}
+            </div>
           )}
-        </form.Subscribe>
-      </form>
-
-      <div className="mt-4 space-y-2 text-center">
-        <div className="flex items-center justify-between">
-          <Button asChild className="px-0" variant="link">
-            <Link search={{ mode: "recover" }} to="/password">
-              Forgot password?
-            </Link>
-          </Button>
-          <Button asChild className="px-0" variant="link">
-            <Link to="/verify-email">Verify your email</Link>
-          </Button>
-        </div>
-        <Button
-          className="text-indigo-600 hover:text-indigo-800"
-          onClick={onSwitchToSignUp}
-          variant="link"
-        >
-          Need an account? Sign Up
-        </Button>
+        </form.Field>
       </div>
-    </div>
+
+      <div>
+        <form.Field name="password">
+          {(field) => (
+            <div className="space-y-2">
+              <Label htmlFor={field.name}>Password</Label>
+              <Input
+                id={field.name}
+                name={field.name}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                type="password"
+                value={field.state.value}
+              />
+              {field.state.meta.errors.map((error) => (
+                <p className="text-red-500" key={error?.message}>
+                  {error?.message}
+                </p>
+              ))}
+            </div>
+          )}
+        </form.Field>
+      </div>
+
+      <form.Subscribe>
+        {(state) => (
+          <Button
+            className="w-full"
+            disabled={!state.canSubmit || state.isSubmitting}
+            type="submit"
+          >
+            {state.isSubmitting ? "Submitting..." : "Sign In"}
+          </Button>
+        )}
+      </form.Subscribe>
+    </form>
   );
 }
