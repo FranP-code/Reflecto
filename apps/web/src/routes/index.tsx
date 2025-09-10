@@ -319,10 +319,6 @@ function HomeComponent() {
               </Button>
             </div>
             <div className="mt-8 flex items-center gap-3 text-muted-foreground text-xs">
-              <span
-                aria-hidden
-                className="inline-block h-5 w-5 rounded-sm bg-gradient-to-br from-purple-500 to-fuchsia-500"
-              />
               <img src="/icon.svg" alt="Icon" />
 
               <span>Private by default • Powered by lightweight AI</span>
