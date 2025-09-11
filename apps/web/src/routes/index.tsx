@@ -67,6 +67,10 @@ function PreviewCard() {
             <div className="aspect-video w-full">
               <iframe
                 className="h-full w-full"
+                style={{
+                  width: "100%",
+                  height: "480px",
+                }}
                 src={videoSrc}
                 title="Reflecto preview"
                 allow="autoplay; encrypted-media; picture-in-picture"
