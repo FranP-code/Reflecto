@@ -1,23 +1,20 @@
 # Reflecto
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Router, Hono, TRPC, and more.
+Reflecto is your AI‑powered second brain. Capture voice notes, images, and text—Reflecto automatically performs OCR and speech‑to‑text, organizes content into connected Spaces, and makes everything instantly searchable.
+
+Originally bootstrapped with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack).
 
 ## Features
 
-- **TypeScript** - For type safety and improved developer experience
-- **TanStack Router** - File-based routing with full type safety
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **shadcn/ui** - Reusable UI components
-- **Hono** - Lightweight, performant server framework
-- **tRPC** - End-to-end type-safe APIs
-- **Bun** - Runtime environment
-- **Drizzle** - TypeScript-first ORM
-- **PostgreSQL** - Database engine
-- **Authentication** - Better-Auth
-- **Husky** - Git hooks for code quality
-- **PWA** - Progressive Web App support
-- **Tauri** - Build native desktop applications
-- **Turborepo** - Optimized monorepo build system
+- **Ingestion** — Upload images and voice notes. OCR and speech‑to‑text run automatically.
+- **AI Processing** — Extracts text and metadata into a structured store for fast retrieval.
+- **Spaces Graph** — Discover AI‑suggested relationships and navigate ideas visually.
+- **Full‑text Search** — Find anything across your entire knowledge base with low latency.
+- **Secure & Private** — Your data is yours—authentication and storage are handled securely.
+- **Voice‑first** — Capture thoughts hands‑free and let Reflecto do the rest.
+- **Beautiful UI** — React + Tailwind + shadcn/ui.
+- **Portable** — PWA support and a Tauri desktop target.
+- **Monorepo Tooling** — Turborepo orchestration, Husky pre‑commit hooks.
 
 ## Getting Started
 
@@ -26,6 +23,15 @@ First, install the dependencies:
 ```bash
 pnpm install
 ```
+
+## Demo
+
+The homepage embeds a looping YouTube preview. You can point it to your own video by setting an env variable in `apps/web/.env`:
+
+```bash
+VITE_YOUTUBE_DEMO_ID=<your_video_id>
+```
+
 ## Database Setup
 
 This project uses PostgreSQL with Drizzle ORM.
@@ -57,14 +63,30 @@ The API is running at [http://localhost:3000](http://localhost:3000).
 ```
 Reflecto/
 ├── apps/
-│   ├── web/         # Frontend application (React + TanStack Router)
-│   └── server/      # Backend API (Hono, TRPC)
+│   ├── web/           # Frontend (React + TanStack Router + Tailwind + shadcn/ui)
+│   ├── server/        # Backend API (Hono, tRPC, Drizzle, PostgreSQL)
+│   └── tldraw/        # tldraw integration (if enabled)
+├── docs/              # Project docs and guides
+├── turbo.json         # Turborepo pipeline config
+├── pnpm-workspace.yaml
+└── package.json       # Root scripts for dev/build
 ```
 
 ## Available Scripts
 
+- `pnpm dev` — Run all relevant dev processes via Turborepo.
+- `pnpm build` — Build all packages/apps.
+- `pnpm check-types` — Typecheck across the monorepo.
+- `pnpm dev:native` — Run the native (Tauri) app in dev, if present.
+- `pnpm dev:web` — Run only the web app in dev.
+- `pnpm dev:server` — Run only the server in dev.
+- `pnpm db:push` — Apply Drizzle schema to the database.
+- `pnpm db:studio` — Open Drizzle Studio.
+- `pnpm db:generate` — Generate SQL migrations from schema.
+- `pnpm db:migrate` — Run pending migrations.
+- `pnpm db:start|db:stop|db:watch|db:down` — Local DB helpers (if configured).
 
-## Authentication (Appwrite)
+## Authentication & Auth Flow (Appwrite)
 
 The project now uses Appwrite Authentication instead of Better-Auth.
 
@@ -78,6 +100,7 @@ Environment variables:
 	- `VITE_APPWRITE_ENDPOINT` — same endpoint as above
 	- `VITE_APPWRITE_PROJECT_ID` — same project id
 	- `VITE_SERVER_URL` — TRPC server URL (e.g. http://localhost:3000)
+	- `VITE_YOUTUBE_DEMO_ID` — optional, overrides the homepage demo video
 
 How it works:
 
@@ -89,3 +112,23 @@ How it works:
 Notes:
 
 - If relying on session cookies from the browser, use a custom domain for Appwrite so cookies are first-party (or enable 3rd-party cookies in local dev).
+
+## Tech Stack
+
+- Web: React, TanStack Router, TanStack Query, TailwindCSS, shadcn/ui
+- Server: Hono, tRPC, Drizzle ORM, PostgreSQL
+- Infra/Tooling: Turborepo, pnpm, Biome, Husky, lint-staged
+- Auth: Appwrite
+- Desktop: Tauri (optional)
+
+## Contributing
+
+Contributions are welcome! Feel free to open issues and pull requests. Before committing, run:
+
+```bash
+pnpm check
+```
+
+## License
+
+MIT
