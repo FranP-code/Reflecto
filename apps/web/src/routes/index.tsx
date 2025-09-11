@@ -44,6 +44,9 @@ function HealthBadge() {
 }
 
 function PreviewCard() {
+  // Allow overriding the demo video via env. Fallback to a standard demo video id.
+  const videoId = (import.meta as any).env?.VITE_YOUTUBE_DEMO_ID ?? "dQw4w9WgXcQ";
+  const videoSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&playsinline=1`;
   return (
     <Card className="mx-auto w-full max-w-4xl overflow-hidden border-white/10 bg-white/5 backdrop-blur">
       <CardContent className="p-0">
@@ -59,32 +62,19 @@ function PreviewCard() {
               <span>reflecto.app</span>
             </div>
           </div>
-          {/* fake content */}
-          <div className="relative bg-grid">
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20" />
-            <div className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2">
-              <div className="space-y-3">
-                <div className="h-10 w-3/4 rounded-md bg-white/10" />
-                <div className="h-4 w-5/6 rounded-md bg-white/10" />
-                <div className="h-4 w-2/3 rounded-md bg-white/10" />
-                <div className="h-4 w-4/5 rounded-md bg-white/10" />
-                <div className="mt-4 h-9 w-40 rounded-md bg-white/10" />
-              </div>
-              <div className="grid grid-rows-3 gap-3">
-                <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                  <div className="mb-2 h-3 w-24 rounded bg-white/10" />
-                  <div className="h-16 rounded bg-white/10" />
-                </div>
-                <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                  <div className="mb-2 h-3 w-28 rounded bg-white/10" />
-                  <div className="h-16 rounded bg-white/10" />
-                </div>
-                <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                  <div className="mb-2 h-3 w-20 rounded bg-white/10" />
-                  <div className="h-16 rounded bg-white/10" />
-                </div>
-              </div>
+          {/* video preview */}
+          <div className="relative bg-black">
+            <div className="aspect-video w-full">
+              <iframe
+                className="h-full w-full"
+                src={videoSrc}
+                title="Reflecto preview"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
             </div>
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20" />
           </div>
         </div>
       </CardContent>
