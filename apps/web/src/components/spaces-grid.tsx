@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Tldraw } from "tldraw";
+import { defaultShapeUtils, Tldraw } from "tldraw";
 import { NewSpaceDialog } from "@/components/new-space-dialog";
 import { SpaceActions } from "@/components/space-actions";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { listUserSpaceSnapshots } from "@/lib/appwrite-db";
 import { authClient } from "@/lib/auth-client";
+import { AIImageShapeUtil, AITextResultShapeUtil } from "@/lib/tldraw/ai-shapes";
 
 type SpaceCard = {
   id: string;
@@ -43,9 +44,9 @@ export function SpacesGrid() {
           try {
             const doc = snapshot?.document as unknown as
               | {
-                  store?: { records?: Record<string, unknown> };
-                  records?: Record<string, unknown>;
-                }
+                store?: { records?: Record<string, unknown> };
+                records?: Record<string, unknown>;
+              }
               | undefined;
             const recs = doc?.store?.records ?? doc?.records;
             return recs ? Object.keys(recs).length : 0;
@@ -210,6 +211,7 @@ export function SpacesGrid() {
                       editor.updateInstanceState({ isReadonly: true });
                     }}
                     snapshot={snapshot}
+                    shapeUtils={[...defaultShapeUtils, AIImageShapeUtil, AITextResultShapeUtil]}
                   />
                 </div>
               </CardContent>
