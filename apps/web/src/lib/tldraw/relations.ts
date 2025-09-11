@@ -45,6 +45,96 @@ export function normalizeShapeHeight(editor: any, shapeId: string) {
   }
 }
 
+/**
+ * Sets up observers to automatically re-run height normalization for
+ * `ai-text-result` shapes whenever their DOM nodes appear and intersect
+ * the viewport. This fixes the issue where offscreen virtualized shapes
+ * come back into view with stale heights.
+ *
+ * Returns a teardown function to disconnect observers on unmount.
+ */
+export function setupHeightAutoNormalize(editor: any): () => void {
+  try {
+    // Track current ai-text-result ids to avoid observing unrelated nodes
+    const isTextResultId = (id: string) => {
+      const s = editor.getShape(id);
+      return !!s && s.type === "ai-text-result";
+    };
+
+    const observed = new Set<string>();
+    const pendingScan = { v: false };
+
+    const io = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const target = entry.target as HTMLElement;
+        const id = target.id;
+        if (!id || !isTextResultId(id)) continue;
+        // Defer a tick so layout fully stabilizes
+        requestAnimationFrame(() => normalizeShapeHeight(editor, id));
+      }
+    }, { root: null, threshold: 0.01 });
+
+    const tryObserve = (id: string) => {
+      if (!id || observed.has(id)) return;
+      if (!isTextResultId(id)) return;
+      const el = document.getElementById(id);
+      if (!el) return;
+      try {
+        io.observe(el);
+        observed.add(id);
+      } catch { /* ignore */ }
+    };
+
+    const scanAll = () => {
+      pendingScan.v = false;
+      try {
+        const ids: string[] = editor.getCurrentPageShapeIds?.() ?? [];
+        for (const id of ids) tryObserve(id);
+      } catch { /* ignore */ }
+    };
+
+    // Mutation observer to catch when TLDraw mounts/unmounts DOM nodes
+    const mo = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === "childList") {
+          // Schedule a batched scan soon after DOM changes
+          if (!pendingScan.v) {
+            pendingScan.v = true;
+            setTimeout(scanAll, 0);
+          }
+        }
+      }
+    });
+
+    try {
+      mo.observe(document.body, { childList: true, subtree: true });
+    } catch { /* ignore */ }
+
+    // Initial scan and a delayed rescan for late fonts/styles
+    scanAll();
+    setTimeout(scanAll, 300);
+
+    // Also rescan when the document changes (e.g., shapes added/removed)
+    const unlisten = editor.store?.listen?.(() => {
+      if (!pendingScan.v) {
+        pendingScan.v = true;
+        setTimeout(scanAll, 0);
+      }
+    }, { scope: "document" });
+
+    return () => {
+      try { io.disconnect(); } catch { /* ignore */ }
+      try { mo.disconnect(); } catch { /* ignore */ }
+      try { unlisten?.(); } catch { /* ignore */ }
+      observed.clear();
+    };
+  } catch {
+    // Fallback no-op teardown
+    return () => {};
+  }
+}
+
 export function extractTextContentFromShape(editor: any, shape: any): string {
   if (!shape) return "";
   if (shape.type === "ai-text-result") return shape.props?.content ?? "";
@@ -58,6 +148,8 @@ export async function generateRelationText(textA: string, textB: string): Promis
     "Given two short texts, write a brief plain-text relation between them.",
     "One line only. No markdown, no lists, no headings.",
     "Return only the relation phrase/sentence.",
+    "Without making a mention of Text A and Text B.",
+    "Just a relation phrase/sentence between the two texts and an explanation.",
     "",
     `Text A: "${textA}"`,
     `Text B: "${textB}"`,

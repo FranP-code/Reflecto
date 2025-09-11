@@ -29,7 +29,7 @@ import { KnowledgeGraphManager } from "@/lib/tldraw/knowledge-graph";
 import { Camera, Sparkles, Link2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { extractTextContentFromShape, generateRelationText, insertRelationBetweenShapes, normalizeShapeHeight } from "@/lib/tldraw/relations";
+import { extractTextContentFromShape, generateRelationText, insertRelationBetweenShapes, normalizeShapeHeight, setupHeightAutoNormalize } from "@/lib/tldraw/relations";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -346,12 +346,16 @@ function SpaceRoute() {
           // Setup drag & drop for images/audio -> AI shapes
           const teardownDrop = setupFileDropHandler(editor);
 
+          // Auto-normalize AI text result heights when they come into view
+          const teardownAutoNormalize = setupHeightAutoNormalize(editor);
+
           // Cleanup listener on unmount
           return () => {
             unlisten();
             window.clearTimeout(timeout);
             // Remove DnD handlers
             if (typeof teardownDrop === "function") teardownDrop();
+            if (typeof teardownAutoNormalize === "function") teardownAutoNormalize();
             (window as any).editor = undefined;
           };
         }}
