@@ -279,6 +279,27 @@ export async function deleteSpace(args: {
 }
 
 /**
+ * Check whether a space exists and is owned by the current (or provided) user.
+ */
+export async function doesUserOwnSpace(
+  spaceId: string,
+  userId?: string
+): Promise<boolean> {
+  ensureEnv();
+  const uid = userId ?? (await getCurrentUserId());
+  if (!uid) {
+    return false;
+  }
+
+  const res = (await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+    Query.equal("spaceId", spaceId),
+    Query.equal("userId", uid),
+  ])) as Models.DocumentList<Models.Document>;
+
+  return (res.documents?.length ?? 0) > 0;
+}
+
+/**
  * Upload an image file to Appwrite Storage and return its identifiers.
  * Applies user-level read/update/delete permissions so only the owner can access it by default.
  */

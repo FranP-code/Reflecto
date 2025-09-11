@@ -21,6 +21,7 @@ import {
   type RemoteSnapshot,
   upsertSpaceSnapshot,
 } from "@/lib/appwrite-db";
+import { doesUserOwnSpace } from "@/lib/appwrite-db";
 import { authClient } from "@/lib/auth-client";
 import { AIImageShapeUtil, AITextResultShapeUtil } from "@/lib/tldraw/ai-shapes";
 import { createImageShapeFromFile, setupFileDropHandler, generateText } from "@/lib/tldraw/processing";
@@ -44,6 +45,7 @@ function SpaceRoute() {
   const { id } = Route.useSearch();
   const { data: session, isPending } = authClient.useSession();
   const navigate = Route.useNavigate();
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (!((session || isPending) && id)) {
@@ -52,6 +54,32 @@ function SpaceRoute() {
       });
     }
   }, [session, isPending, navigate, id]);
+
+  // Check that the space exists and is owned by the current user BEFORE anything else
+  useEffect(() => {
+    let cancelled = false;
+    async function check() {
+      if (!(id && session)) return;
+      setAuthorized(null);
+      try {
+        const ok = await doesUserOwnSpace(id, session.$id);
+        if (!cancelled) setAuthorized(!!ok);
+      } catch {
+        if (!cancelled) setAuthorized(false);
+      }
+    }
+    check();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, session]);
+
+  // If unauthorized, redirect to dashboard
+  useEffect(() => {
+    if (authorized === false) {
+      navigate({ to: "/dashboard" });
+    }
+  }, [authorized, navigate]);
 
   // Create a stable store instance once
   const store = useMemo(
@@ -71,11 +99,11 @@ function SpaceRoute() {
   // Track latest saved version hash to suppress redundant saves
   const lastSavedRef = useRef<string>("");
 
-  // Load initial snapshot from Appwrite
+  // Load initial snapshot from Appwrite (only after authorization)
   useEffect(() => {
     let cancelled = false;
     async function load(_id: string | undefined) {
-      if (!(_id && session)) {
+      if (!(_id && session && authorized)) {
         return;
       }
       const remote = await getLatestSpaceSnapshot(_id, session.$id);
@@ -95,15 +123,20 @@ function SpaceRoute() {
       }
     }
     setStoreWithStatus({ status: "not-synced", store });
-    load(id);
+    if (authorized) {
+      load(id);
+    }
     return () => {
       cancelled = true;
     };
-  }, [id, session, store]);
+  }, [id, session, store, authorized]);
 
-  if (!(id && session)) {
+  // Show loader while waiting for session/id or auth check
+  if (!(id && session) || authorized === null) {
     return <Loader />;
   }
+  // If explicitly unauthorized, render nothing (we redirect)
+  if (authorized === false) return null;
 
   // Provide a custom Toolbar that injects our upload buttons into the bottom toolbar
   const components: TLComponents = {
@@ -318,7 +351,7 @@ function SpaceRoute() {
           let timeout: number | undefined;
           const unlisten = editor.store.listen(
             () => {
-              if (!(id && session)) {
+              if (!(id && session && authorized)) {
                 return;
               }
               window.clearTimeout(timeout);
